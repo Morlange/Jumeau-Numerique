@@ -13,12 +13,16 @@ from matplotlib import pyplot as plt
 import numpy as np
 from matplotlib.patches import Circle, Wedge, Rectangle
 import time
+from opcua import Client
 
 #données pour analyse 
 TRS=[23,54,78]
 Temps_de_production=[46,6,23]
 Nombre_pieces=[12,10,7]
 LogoAM = "Logo_AM.png"
+Serveur_ON = False
+url = "opc.tcp://127.0.0.1:4880"
+client = Client(url)
 
 #données OF
 
@@ -430,18 +434,56 @@ def ouvrir_OF ():
 
 def ouvrir_etat ():
     
-    subprocess.Popen("python3 Interface_machines_v2.0.py")
+    if Serveur_ON:
+        subprocess.Popen("python3 Interface_machines.py")
+    else :
+        # creation de l'objet fenetre
+        fen_Error_co= Tk()
+
+        #Titre de la fenetre
+        fen_Error_co.title('Erreur de connection')
+
+        #Taille de la fenetre
+        fen_Error_co.geometry('300x200')
+
+        #icone de fenetre
+        fen_Error_co.iconbitmap(LogoAM)
+
+        #configuration du fond
+        fen_Error_co.config(background='#333333')
+        #Ajout d'un titre 
+        label_titre = Label(fen_Error_co, text='Erreur de connection \nVeuillez lancer le serveur en premier', height=2,font=('Calibri', 14),fg='#dcdcaa', bg = '#333333') 
+        label_titre.grid(row=0,column=0, padx=10, pady=75)
+
+        fen_Error_co.mainloop()
 
 def lancer_serveur():
 
+    global Serveur_ON
     if not Serveur_ON:
         subprocess.Popen("python3 Serveur.py")
-        time.sleep(5)
+        time.sleep(2)
+        client.connect()
+        print("Interface connectée")
+        Serveur_ON = True
+        label_etat_serv.configure(text="Etat du serveur : Connecté")
+        fen.update()
 
 def stop_serveur():
 #On restart le programme pour espérer arrêter le serveur
+    global Serveur_ON
     if Serveur_ON :
-        quit()
+        Stop = client.get_node("ns = 2; i = 16")
+        Stop.set_value(1)
+        client.disconnect()
+        Serveur_ON = False
+        label_etat_serv.configure(text="Etat du serveur : Déconnecté")
+        fen.update()
+
+def quitter():
+    if Serveur_ON :
+        stop_serveur()
+    fen.destroy()
     
     
 #Creation de l'objet fenetre
@@ -479,11 +521,18 @@ bouton_analyse = tkinter.Button (fen, text = 'Analyse de production',bd=1,font=(
 bouton_analyse.grid(row=1, column=2, padx=40, pady=100)
 
 bouton_start_server = tkinter.Button (fen, text = 'Lancer le serveur',bd=1,font=('Calibri', 12), fg='#dcdcaa', bg = '#1e1e1e',command=lancer_serveur)
-bouton_start_server.grid(row=2, column=0, padx=40, pady=100)
+bouton_start_server.grid(row=2, column=1, padx=40, pady=100)
 
 
-bouton_reboot = tkinter.Button (fen, text = 'Stopper le serveur',bd=1,font=('Calibri', 12), fg='#dcdcaa', bg = '#1e1e1e',command=stop_serveur)
-bouton_reboot.grid(row=2, column=1, padx=40, pady=100)    
+bouton_serv = tkinter.Button (fen, text = 'Stopper le serveur',bd=1,font=('Calibri', 12), fg='#dcdcaa', bg = '#1e1e1e',command=stop_serveur)
+bouton_serv.grid(row=2, column=2, padx=40, pady=100)
+
+label_etat_serv = Label(fen, text='Etat du serveur : Déconnecté', height=2,font=('Calibri', 14),fg='#dcdcaa', bg = '#333333')
+label_etat_serv.grid(row=2, column=0, padx=40, pady=100)
+
+bouton_quitter = tkinter.Button (fen, text = 'Quitter',bd=1,font=('Calibri', 12), fg='#dcdcaa', bg = '#1e1e1e',command=quitter)
+bouton_quitter.grid(row=3, column=0, padx=40, pady=40)
+
 
 #Boucle d'affichage
 fen.mainloop()

@@ -154,6 +154,7 @@ Tps_cycle_node = Param.add_variable(addspace, "Valeurs de temps de cycle", Tps_c
 Tps_cycle_moy_node = Param.add_variable(addspace, "Valeurs de temps de cycle moyen", TC_moy)
 Lead_Time_node = Param.add_variable(addspace, "Valeurs de lead time (temps de traversée)", Lead_Time[-1])
 Lead_Time_moy_node = Param.add_variable(addspace, "Valeurs de lead time moyen", Lead_Time_moy)
+Stop_serv = Param.add_variable(addspace, "Pour stopper le serveur", 0)
 
 
 #Autorisation de modification de certaines variables
@@ -170,6 +171,7 @@ Tps_cycle_node.set_writable()
 Tps_cycle_moy_node.set_writable()
 Lead_Time_node.set_writable()
 Lead_Time_moy_node.set_writable()
+Stop_serv.set_writable()
 
 #Lancement du serveur
 serveur.start()
@@ -189,6 +191,7 @@ while True:
     Nb_piece_Machine = [Machines[i].nb_piece for i in range(Nb_Machines)]
     Switch_Etat = Demande_chgt_etat.get_value()
     Nb_seq = Deb.get_value()
+    Stop = Stop_serv.get_value()
 
     #Changement des états des machines si besoin
     if Switch_Etat != [0,0,0,0]:
@@ -254,6 +257,13 @@ while True:
         Tps_cycle_moy_node.set_value(TC_moy)
         Lead_Time_node.set_value(Lead_Time)
         Lead_Time_moy_node.set_value(Lead_Time_moy)
+
+        #On peut eteindre le serveur si on lui demande
+    if Stop:
+        time.sleep(2)
+        serveur.stop()
+        print("Serveur déconnecté")
+        break
 
 
     

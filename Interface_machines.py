@@ -34,6 +34,7 @@ def main():
     Lead_Time_node = client.get_node("ns = 2; i = 14")
     Lead_Time_moy_node = client.get_node("ns = 2; i = 15")
     Deb = client.get_node("ns = 2; i = 5")
+    Stop_serv = client.get_node("ns = 2; i = 16")
 
     #Initialisation de la fenêtre Tkinter
     fen_etat=Tk()
@@ -198,6 +199,7 @@ def main():
         Nb_pieces_finies = Piece_finie.get_value()
         Tps_cycle,Tc_moy,Lead_Time,Lead_Time_moy = Tps_cycle_node.get_value(),Tps_cycle_moy_node.get_value(), Lead_Time_node.get_value(), Lead_Time_moy_node.get_value()
         Nb_seq = Deb.get_value()
+        Stop = Stop_serv.get_value()
 
         
         #Actualisation du nombre de pièces par machine et du nombre de pièces par stock
@@ -233,12 +235,16 @@ def main():
             Ancien_nb_P_finie = Nb_pieces_finies
         
         
+        if Stop:
+            client.disconnect()
+            fen_etat.destroy()
+            return "Travail terminé"
             
         #Actualisation de la fenêtre
         fen_etat.update()
     
 try:
-    main()
+    print(main())
 except ConnectionRefusedError :
     # creation de l'objet fenetre
     fen_Error_co= Tk()
