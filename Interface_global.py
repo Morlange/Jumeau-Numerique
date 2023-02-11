@@ -435,7 +435,7 @@ def ouvrir_etat ():
 def lancer_serveur():
 
     if not Serveur_ON:
-        subprocess.Popen("python3 Serveur_v2.0.py")
+        subprocess.Popen("python3 Serveur.py")
         time.sleep(5)
 
 def stop_serveur():
