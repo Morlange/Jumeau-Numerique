@@ -434,7 +434,7 @@ def ouvrir_OF ():
 
 def ouvrir_etat ():
     
-    if Serveur_ON:
+    if not Serveur_ON:
         subprocess.Popen("python3 Interface_machines.py")
     else :
         # creation de l'objet fenetre
