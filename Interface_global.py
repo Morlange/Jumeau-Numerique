@@ -1,8 +1,9 @@
 # coding: utf-8
 
 # import bibliothèque
+from PIL import Image, ImageTk
 import tkinter
-from tkinter import *
+from tkinter import Label, Tk, Canvas, Menu, Entry, N, S, VERTICAL
 from tkinter import ttk
 from tkinter.messagebox import showinfo
 import xlrd
@@ -17,6 +18,7 @@ from opcua import Client
 
 #données pour analyse 
 TRS=[23,54,78]
+Images_TRS = []
 Temps_de_production=[46,6,23]
 Nombre_pieces=[12,10,7]
 LogoAM = "Logo_AM.png"
@@ -88,155 +90,150 @@ def ouvrir_analyse ():
     Label(frame_TRS, text=TRS[2], fg='#dcdcaa', bg = '#333333').grid(row=2, column=2, padx=10, pady=20)
 
     #Affichage des graphes des TRS
+    def creerGraphsTRS(x,name):
+        #x valeur en pourcentage
+        TRSgraph=[]
+        namefile = name
+        if not name[-4:] == ".png":
+            namefile += ".png"
 
-    TRSgraph=[]
-
-    for TRSzone in TRS :
-        a=TRSzone%10
+        
+        a=x%10
         if a==1 or a==2 or a==3 : 
-            TRSzone=int((TRSzone/10)%10)*10
+            x=int((x/10)%10)*10
         elif a==4 or a==5 :
-            TRSzone=int((TRSzone/10)%10)*10+5
+            x=int((x/10)%10)*10+5
         elif a==6 or a==7 or a==8 : 
-            TRSzone=int((TRSzone/10)%10)*10+5
+            x=int((x/10)%10)*10+5
         elif a==9 : 
-            TRSzone=int((TRSzone/10)%10)*10+10
+            x=int((x/10)%10)*10+10
         
         TRSlist=[0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100]
-        TRSgraph.append(TRSlist.index(TRSzone)+1)  
+        TRSgraph.append(TRSlist.index(x)+1)  
 
-    def degree_range(n): 
-        start = np.linspace(0,180,n+1, endpoint=True)[0:-1]
-        end = np.linspace(0,180,n+1, endpoint=True)[1::]
-        mid_points = start + ((end-start)/2.)
-        return np.c_[start, end], mid_points
+        def degree_range(n): 
+            start = np.linspace(0,180,n+1, endpoint=True)[0:-1]
+            end = np.linspace(0,180,n+1, endpoint=True)[1::]
+            mid_points = start + ((end-start)/2.)
+            return np.c_[start, end], mid_points
 
 
-    def rot_text(ang): 
-        rotation = np.degrees(np.radians(ang) * np.pi / np.pi - np.radians(90))
-        return rotation
+        def rot_text(ang): 
+            rotation = np.degrees(np.radians(ang) * np.pi / np.pi - np.radians(90))
+            return rotation
 
-    def gauge(labels=['LOW','MEDIUM','HIGH','VERY HIGH','EXTREME'], \
-            colors='jet_r', arrow=1, title='', fname=False): 
+        def gauge(labels=['LOW','MEDIUM','HIGH','VERY HIGH','EXTREME'], \
+                colors='jet_r', arrow=1, title='', fname=False): 
+            
+            """
+            some sanity checks first
+            
+            """
+            
+            N = len(labels)
+            
+            if arrow > N: 
+                raise Exception("\n\nThe category ({}) is greated than \
+                the length\nof the labels ({})".format(arrow, N))
         
-        """
-        some sanity checks first
+            
+            """
+            if colors is a string, we assume it's a matplotlib colormap
+            and we discretize in N discrete colors 
+            """
+            
+            if isinstance(colors, str):
+                cmap = cm.get_cmap(colors, N)
+                cmap = cmap(np.arange(N))
+                colors = cmap[::-1,:].tolist()
+            if isinstance(colors, list): 
+                if len(colors) == N:
+                    colors = colors[::-1]
+                else: 
+                    raise Exception("\n\nnumber of colors {} not equal \
+                    to number of categories{}\n".format(len(colors), N))
+
+            """
+            begins the plotting
+            """
+            
+            fig, ax = plt.subplots()
+
+            ang_range, mid_points = degree_range(N)
+
+            labels = labels[::-1]
+            
+            """
+            plots the sectors and the arcs
+            """
+            patches = []
+            for ang, c in zip(ang_range, colors): 
+                # sectors
+                patches.append(Wedge((0.,0.), .4, *ang, facecolor='w', lw=2))
+                # arcs
+                patches.append(Wedge((0.,0.), .4, *ang, width=0.10, facecolor=c, lw=2, alpha=0.5))
+            
+            [ax.add_patch(p) for p in patches]
+
+            
+            """
+            set the labels (e.g. 'LOW','MEDIUM',...)
+            """
+
+            for mid, lab in zip(mid_points, labels): 
+
+                ax.text(0.35 * np.cos(np.radians(mid)), 0.35 * np.sin(np.radians(mid)), lab, \
+                    horizontalalignment='center', verticalalignment='center', fontsize=14, \
+                    fontweight='bold', rotation = rot_text(mid))
+
+            """
+            set the bottom banner and the title
+            """
+            r = Rectangle((-0.4,-0.1),0.8,0.1, facecolor='w', lw=2)
+            ax.add_patch(r)
+            
+            ax.text(0, -0.05, title, horizontalalignment='center', \
+                verticalalignment='center', fontsize=22, fontweight='bold')
+
+            """
+            plots the arrow now
+            """
+            
+            pos = mid_points[abs(arrow - N)]
+            
+            ax.arrow(0, 0, 0.225 * np.cos(np.radians(pos)), 0.225 * np.sin(np.radians(pos)), \
+                        width=0.04, head_width=0.09, head_length=0.1, fc='k', ec='k')
+            
+            ax.add_patch(Circle((0, 0), radius=0.02, facecolor='k'))
+            ax.add_patch(Circle((0, 0), radius=0.01, facecolor='w', zorder=11))
+
+            """
+            removes frame and ticks, and makes axis equal and tight
+            """
+            
+            ax.set_frame_on(False)
+            ax.axes.set_xticks([])
+            ax.axes.set_yticks([])
+            ax.axis('equal')
+            plt.tight_layout()
+            if fname:
+                fig.savefig(fname, dpi=200)
+
+
+        image=gauge(labels=['0',' ','10',' ','20',' ','30',' ','40',' ','50',' ','60',' ','70',' ','80',' ','90',' ','100'], \
+            colors=['#ED1C24','#ED1C24','#ED1C24','#ED1C24','#ED1C24','#FFCC00','#FFCC00','#FFCC00','#FFCC00','#FFCC00',
+                    '#FFCC00','#FFCC00','#FFCC00','#FFCC00','#FFCC00','#FFCC00','#007A00','#007A00','#007A00','#007A00',
+                    '#007A00'], arrow=TRSgraph[0], title='TRS fonderie')
         
-        """
-        
-        N = len(labels)
-        
-        if arrow > N: 
-            raise Exception("\n\nThe category ({}) is greated than \
-            the length\nof the labels ({})".format(arrow, N))
-    
-        
-        """
-        if colors is a string, we assume it's a matplotlib colormap
-        and we discretize in N discrete colors 
-        """
-        
-        if isinstance(colors, str):
-            cmap = cm.get_cmap(colors, N)
-            cmap = cmap(np.arange(N))
-            colors = cmap[::-1,:].tolist()
-        if isinstance(colors, list): 
-            if len(colors) == N:
-                colors = colors[::-1]
-            else: 
-                raise Exception("\n\nnumber of colors {} not equal \
-                to number of categories{}\n".format(len(colors), N))
+        plt.savefig(namefile, transparent = True)
 
-        """
-        begins the plotting
-        """
-        
-        fig, ax = plt.subplots()
-
-        ang_range, mid_points = degree_range(N)
-
-        labels = labels[::-1]
-        
-        """
-        plots the sectors and the arcs
-        """
-        patches = []
-        for ang, c in zip(ang_range, colors): 
-            # sectors
-            patches.append(Wedge((0.,0.), .4, *ang, facecolor='w', lw=2))
-            # arcs
-            patches.append(Wedge((0.,0.), .4, *ang, width=0.10, facecolor=c, lw=2, alpha=0.5))
-        
-        [ax.add_patch(p) for p in patches]
-
-        
-        """
-        set the labels (e.g. 'LOW','MEDIUM',...)
-        """
-
-        for mid, lab in zip(mid_points, labels): 
-
-            ax.text(0.35 * np.cos(np.radians(mid)), 0.35 * np.sin(np.radians(mid)), lab, \
-                horizontalalignment='center', verticalalignment='center', fontsize=14, \
-                fontweight='bold', rotation = rot_text(mid))
-
-        """
-        set the bottom banner and the title
-        """
-        r = Rectangle((-0.4,-0.1),0.8,0.1, facecolor='w', lw=2)
-        ax.add_patch(r)
-        
-        ax.text(0, -0.05, title, horizontalalignment='center', \
-            verticalalignment='center', fontsize=22, fontweight='bold')
-
-        """
-        plots the arrow now
-        """
-        
-        pos = mid_points[abs(arrow - N)]
-        
-        ax.arrow(0, 0, 0.225 * np.cos(np.radians(pos)), 0.225 * np.sin(np.radians(pos)), \
-                    width=0.04, head_width=0.09, head_length=0.1, fc='k', ec='k')
-        
-        ax.add_patch(Circle((0, 0), radius=0.02, facecolor='k'))
-        ax.add_patch(Circle((0, 0), radius=0.01, facecolor='w', zorder=11))
-
-        """
-        removes frame and ticks, and makes axis equal and tight
-        """
-        
-        ax.set_frame_on(False)
-        ax.axes.set_xticks([])
-        ax.axes.set_yticks([])
-        ax.axis('equal')
-        plt.tight_layout()
-        if fname:
-            fig.savefig(fname, dpi=200)
+    im_fonderie = creerGraphsTRS(TRS[0],"TRS_fonderie")
+    im_usinage= creerGraphsTRS(TRS[1],"TRS_usinage")
+    im_assemblage= creerGraphsTRS(TRS[2],"TRS_assemblage")
 
 
-    fonderie=gauge(labels=['0',' ','10',' ','20',' ','30',' ','40',' ','50',' ','60',' ','70',' ','80',' ','90',' ','100'], \
-        colors=['#ED1C24','#ED1C24','#ED1C24','#ED1C24','#ED1C24','#FFCC00','#FFCC00','#FFCC00','#FFCC00','#FFCC00',
-                '#FFCC00','#FFCC00','#FFCC00','#FFCC00','#FFCC00','#FFCC00','#007A00','#007A00','#007A00','#007A00',
-                '#007A00'], arrow=TRSgraph[0], title='TRS fonderie')
-    plt.savefig('TRS_fonderie.png', transparent = True) 
-    im_fonderie=PhotoImage(file='TRS_fonderie.png')
-
-    usinage=gauge(labels=['0',' ','10',' ','20',' ','30',' ','40',' ','50',' ','60',' ','70',' ','80',' ','90',' ','100'], \
-        colors=['#ED1C24','#ED1C24','#ED1C24','#ED1C24','#ED1C24','#FFCC00','#FFCC00','#FFCC00','#FFCC00','#FFCC00',
-                '#FFCC00','#FFCC00','#FFCC00','#FFCC00','#FFCC00','#FFCC00','#007A00','#007A00','#007A00','#007A00',
-                '#007A00'], arrow=TRSgraph[1], title='TRS usinage')
-    plt.savefig('TRS_usinage.png', transparent = True) 
-    im_usinage=PhotoImage(file='TRS_usinage.png')
-
-
-    assemblage=gauge(labels=['0',' ','10',' ','20',' ','30',' ','40',' ','50',' ','60',' ','70',' ','80',' ','90',' ','100'], \
-        colors=['#ED1C24','#ED1C24','#ED1C24','#ED1C24','#ED1C24','#FFCC00','#FFCC00','#FFCC00','#FFCC00','#FFCC00',
-                '#FFCC00','#FFCC00','#FFCC00','#FFCC00','#FFCC00','#FFCC00','#007A00','#007A00','#007A00','#007A00',
-                '#007A00'], arrow=TRSgraph[2], title='TRS assemblage')
-    plt.savefig('TRS_assemblage.png', transparent = True) 
-    im_assemblage=PhotoImage(file='TRS_assemblage.png')
-
-    im_fonderie.grid(row=7,column=4,padx=50, pady=10)
+    subprocess.Popen("python3 analyse.py")
+    """im_fonderie.grid(row=7,column=4,padx=50, pady=10)
     im_usinage.grid(row=8,column=4,padx=50, pady=10)
     im_assemblage.grid(row=9,column=4,padx=50, pady=10)
     
@@ -264,6 +261,7 @@ def ouvrir_analyse ():
 
     #Boucle d'affichage
     fen.mainloop()
+    """
 
 def ouvrir_OF ():
     ############### fenetre #######################
@@ -433,8 +431,8 @@ def ouvrir_OF ():
 
 
 def ouvrir_etat ():
-    
-    if not Serveur_ON:
+    print(Serveur_ON)
+    if Serveur_ON:
         subprocess.Popen("python3 Interface_machines.py")
     else :
         # creation de l'objet fenetre
@@ -484,7 +482,38 @@ def quitter():
     if Serveur_ON :
         stop_serveur()
     fen.destroy()
+
+def flux ():
+    # creation de l'objet fenetre
+    fen_flux= Tk()
+
+    #Titre de la fenetre
+    fen_flux.title('Analyse de production')
+
+    #Taille de la fenetre
+    fen_flux.geometry('1300x630')
+
+    #icone de fenetre
+    fen_flux.iconbitmap('logo-AM.ico')
+
+    #configuration du fond
+    fen_flux.config(background='#D3D3D3')
     
+    label_titre = Label(fen_flux, text='Analyse de production', height=1,fg='black',font=('Calibri', 14),bg='#D3D3D3') 
+    label_titre.grid(row=0,column=1)
+
+    #Frame TRS
+    frame_TRS = tkinter.LabelFrame(fen_flux, text='TRS', font =('Calibri', 12), bg='#D3D3D3', labelanchor='nw')
+    frame_TRS.grid(row=1,column=0)
+    Label(frame_TRS, text='Flux').grid(row=1, column=0)
+
+    #def afficher_Image(fen,row,column,name,size):
+    size = (100,150)
+    img = ImageTk.PhotoImage(Image.open("flux.png").resize((50,50)))
+    canv = Canvas(frame_TRS, highlightthickness = 0, bg="#333333", height=size[0], width=size[1])
+    canv.grid(row=0, column=0)
+    canv.create_image(0,0, image = img)
+
     
 #Creation de l'objet fenetre
 fen= Tk()
@@ -513,6 +542,9 @@ mon_menu.add_command(label='Analyse',command=ouvrir_analyse)
 # boutons fenetre
 bouton_etat = tkinter.Button (fen, text = 'Etat des machines',bd=1, font=('Calibri', 12),fg='#dcdcaa', bg = '#1e1e1e',command=ouvrir_etat)
 bouton_etat.grid(row=1, column=0, padx=40, pady=100)
+
+bouton_flux = tkinter.Button (fen,text='Affichage du flux', bd=1, font=('Calibri', 12),fg='#dcdcaa', bg = '#1e1e1e',command=flux)
+bouton_flux.grid(row=3, column=1, padx=40,pady=100)
 
 bouton_OF = tkinter.Button (fen, text = 'Ordres de fabrication',bd=1,font=('Calibri', 12), fg='#dcdcaa', bg = '#1e1e1e',command=ouvrir_OF)
 bouton_OF.grid(row=1, column=1, padx=40, pady=100)

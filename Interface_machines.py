@@ -242,11 +242,13 @@ def main():
             
         #Actualisation de la fenêtre
         fen_etat.update()
-    
+
+"""
 try:
     print(main())
 except ConnectionRefusedError :
     # creation de l'objet fenetre
+    print("M")
     fen_Error_co= Tk()
 
     #Titre de la fenetre
@@ -264,5 +266,6 @@ except ConnectionRefusedError :
     label_titre = Label(fen_Error_co, text='Erreur de connection \nVeuillez lancer le serveur en premier', height=2,font=('Calibri', 14),fg='#dcdcaa', bg = '#333333') 
     label_titre.grid(row=0,column=0, padx=10, pady=75)
 
-    fen_Error_co.mainloop()
+    fen_Error_co.mainloop()"""
+main()
 
