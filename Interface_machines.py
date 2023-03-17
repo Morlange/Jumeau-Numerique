@@ -5,6 +5,7 @@ from opcua import Node
 from product import produit, machine
 from PIL import Image, ImageTk
 from tkinter import ttk
+from data import color_bg1, color_bg, color_fg
 
 
 LogoAM = "Logo_AM.png"
@@ -120,7 +121,7 @@ def main():
 
 
     #Création d'un bouton pour lancer des OF
-    Bouton_debut_OF = Button(fen_etat,text="Lancement 1 OF",bd=1,font=('Times new roman', 12), fg='#dcdcaa', bg = '#1e1e1e',command=partial(Demande_ajout_OF,Nb_seq), width= 14)
+    Bouton_debut_OF = Button(fen_etat,text="Lancement 1 OF",bd=1,font=('Times new roman', 12), fg=color_fg, bg = color_bg,command=partial(Demande_ajout_OF,Nb_seq), width= 14)
     Bouton_debut_OF.place(x = 10, y = 10)
 
     #Création des machines
@@ -133,26 +134,26 @@ def main():
     #Création des bouton relatifs au machines E/S
     for i in range (nb_machine):
         if i != 0:
-            bouton=Button(fen_etat,text=" Entrée machine ",bd=1,font=('Times new roman', 12), fg='#dcdcaa', bg = '#1e1e1e',command=partial(entree_machine,i), width= 14)
+            bouton=Button(fen_etat,text=" Entrée machine ",bd=1,font=('Times new roman', 12), fg=color_fg, bg = color_bg,command=partial(entree_machine,i), width= 14)
             bouton.place(x=list_x[i] - 9*7 ,y=list_y[i]+70)
         if i != nb_machine-1:
-            bouton=Button(fen_etat,text=" Sortie machine ",bd=1,font=('Times new roman', 12), fg='#dcdcaa', bg = '#1e1e1e',command=partial(sortie_machine,i), width= 14)
+            bouton=Button(fen_etat,text=" Sortie machine ",bd=1,font=('Times new roman', 12), fg=color_fg, bg = color_bg,command=partial(sortie_machine,i), width= 14)
             bouton.place(x=list_x[i] - 9*7 ,y=list_y[i]+105)
-    bouton_suivant[0]=Button(fen_etat,text=" Nouvelle pièce ",bd=1,font=('Times new roman', 12), fg='#dcdcaa', bg = '#1e1e1e',command=nouvelle_piece, width= 14)
+    bouton_suivant[0]=Button(fen_etat,text=" Nouvelle pièce ",bd=1,font=('Times new roman', 12), fg=color_fg, bg = color_bg,command=nouvelle_piece, width= 14)
     bouton_suivant[0].place(x=list_x[0] - 9*7 ,y=list_y[nb_machine-1]+70)
-    bouton_suivant[-1]=Button(fen_etat,text=" Pièce finie ",bd=1,font=('Times new roman', 12), fg='#dcdcaa', bg = '#1e1e1e',command=fin_piece, width= 14)
+    bouton_suivant[-1]=Button(fen_etat,text=" Pièce finie ",bd=1,font=('Times new roman', 12), fg=color_fg, bg = color_bg,command=fin_piece, width= 14)
     bouton_suivant[-1].place(x=list_x[nb_machine-1] - 9*7,y=list_y[nb_machine-1]+105)
     """
 
     #Création des labels pour le nombre de pièces dans les machines
     for i in range (nb_machine):
-        Label_position_machine[i]=Label(fen_etat,text=Nb_piece_machine[i],bd=0,font=('Times new roman', 12),fg='#dcdcaa', bg='#333333')
+        Label_position_machine[i]=Label(fen_etat,text=Nb_piece_machine[i],bd=0,font=('Times new roman', 12),fg=color_fg, bg=color_bg1)
         Label_position_machine[i].place(x=list_x[i]- 4.5,y=list_y[i]+20)
 
 
     #Création des labels pour afficher le nombre de pièces dans les stockages/transports
     for i in range (nb_machine-1):
-        Label_position_transport[i]=Label(fen_etat,text="NON",bd=0,font=('Times new roman', 12),fg='#dcdcaa', bg='#333333')
+        Label_position_transport[i]=Label(fen_etat,text="NON",bd=0,font=('Times new roman', 12),fg=color_fg, bg=color_bg1)
         Label_position_transport[i].place(x=(list_x[i+1]+list_x[i])/2,y=(list_y[i]+list_y[i+1])/2+20)
         Images += [canv.create_image((list_x[i+1]+list_x[i])/2, (list_y[i]+list_y[i+1])/2+100, image = img[0])]
 
@@ -162,13 +163,13 @@ def main():
     #Les Labels s'actualisent à chaque fois qu'une pièce se termine
     print("Ah...")
     for i in range (nb_machine):
-        Label_temps_cycle[i]=Label(fen_etat,text= "Temps de cycle {0} : {1} secondes".format(nom_machine[i],Tps_cycle[i]),bd=0,font=('Times new roman', 12),fg='#dcdcaa', bg = '#1e1e1e')
+        Label_temps_cycle[i]=Label(fen_etat,text= "Temps de cycle {0} : {1} secondes".format(nom_machine[i],Tps_cycle[i]),bd=0,font=('Times new roman', 12),fg=color_fg, bg = color_bg)
         Label_temps_cycle[i].place(x=20,y=940-45*(1+i))
-        Label_temps_cycle_moy[i]=Label(fen_etat,text= "Temps de cycle moyen {0} : {1} secondes".format(nom_machine[i],Tc_moy[i]),bd=0,font=('Times new roman', 12),fg='#dcdcaa', bg = '#1e1e1e')
+        Label_temps_cycle_moy[i]=Label(fen_etat,text= "Temps de cycle moyen {0} : {1} secondes".format(nom_machine[i],Tc_moy[i]),bd=0,font=('Times new roman', 12),fg=color_fg, bg = color_bg)
         Label_temps_cycle_moy[i].place(x=500,y=940-45*(1+i))
-    Label_Lead_Time=Label(fen_etat,text='Lead Time ',bd=0,font=('Times new roman', 12),fg='#dcdcaa', bg = '#1e1e1e')
+    Label_Lead_Time=Label(fen_etat,text='Lead Time ',bd=0,font=('Times new roman', 12),fg=color_fg, bg = color_bg)
     Label_Lead_Time.place(x=20,y=940)
-    Label_Lead_Time_moy=Label(fen_etat,text='Lead Time moyen',bd=0,font=('Times new roman', 12),fg='#dcdcaa', bg = '#1e1e1e')
+    Label_Lead_Time_moy=Label(fen_etat,text='Lead Time moyen',bd=0,font=('Times new roman', 12),fg=color_fg, bg = color_bg)
     Label_Lead_Time_moy.place(x=500,y=940)
 
 
@@ -261,9 +262,9 @@ except ConnectionRefusedError :
     fen_Error_co.iconbitmap(LogoAM)
 
     #configuration du fond
-    fen_Error_co.config(background='#333333')
+    fen_Error_co.config(background=color_bg1)
     #Ajout d'un titre 
-    label_titre = Label(fen_Error_co, text='Erreur de connection \nVeuillez lancer le serveur en premier', height=2,font=('Calibri', 14),fg='#dcdcaa', bg = '#333333') 
+    label_titre = Label(fen_Error_co, text='Erreur de connection \nVeuillez lancer le serveur en premier', height=2,font=('Calibri', 14),fg=color_fg, bg = color_bg1) 
     label_titre.grid(row=0,column=0, padx=10, pady=75)
 
     fen_Error_co.mainloop()"""
