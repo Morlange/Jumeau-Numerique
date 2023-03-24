@@ -1,0 +1,13 @@
+Ligne;Assemblage
+Four;Fonderie
+Degauchiseuse;Forge
+Emboutisseuse;Forge
+Emboutisseuse;Forge
+Emboutisseuse;Forge
+Emboutisseuse;Forge
+Emboutisseuse;Forge
+Emboutisseuse;Forge
+Emboutisseuse;Forge
+
+
+

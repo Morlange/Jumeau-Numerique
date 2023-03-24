@@ -1,8 +1,11 @@
+#importation des bibliothèques
 from tkinter import Tk, Canvas
 from datetime import datetime, timedelta, date
+import subprocess
 
 class Calendrier:
     def __init__(self, master = None, rows=5, cols=7, width=400, height=400, bg="white", fg="green", day = 0, month = 0,grid = (0,0)):
+        """Initialisation"""
         if master == None:
             self.master = Tk()
             self.master.title("Calendrier")
@@ -20,12 +23,14 @@ class Calendrier:
         self.canvas.grid(row=0,column=0)
         self.grid = []
         self.offset_day = -day
-        self.offset_month = month            
+        self.offset_month = month  
+        #Reécris la date          
         self.date_now = (datetime.now() - timedelta(days = self.offset_day)).strftime("%A/%d/%m/%Y")
         self.wday, self.day, self.month, self.years = self.date_now.split("/")
         if not self.offset_month == 0:
             self.date_now = (datetime.now() - timedelta(days = self.offset_day)- timedelta(days = -30*self.offset_month)).strftime("%A/%d/%m/%Y")
             self.wday, self.day, self.month, self.years = self.date_now.split("/")
+        #Récupère le premier jour du mois pour bien le placer sur la calendrier
         self.fdaymonthname, self.fdaymonth, self.month = (date(int(self.years),int(self.month),int(self.day)) - timedelta(days=int(self.day)-1)).strftime("%A/%d/%m").split("/")
         self.dict_wdays = {"Monday":0,"Tuesday":1,"Wednesday":2,"Thursday":3,"Friday":4,"Saturday":5,"Sunday":6}
         self.dict_wmonth = {"01":"Janvier","02":"Février","03":"Mars","04":"Avril","05":"Mai","06":"Juin","07":"Juillet","08":"Août","09":"Septembre","10":"Octobre","11":"Novembre","12":"Décembre"}
@@ -38,6 +43,7 @@ class Calendrier:
         self.CreerGrille()
         
     def CreerGrille(self):
+        '''Crée les cases du calendrier'''
         self.rect_mois = self.canvas.create_rectangle(0,0,4*self.w,int(self.h*0.7), fill=self.bg)
         self.text_mois = self.canvas.create_text((4*self.w)//2,((self.h*0.7))//2,text=self.dict_wmonth[self.month], justify="center")
         self.start_grille = (0,-self.h*1.4)
@@ -74,6 +80,7 @@ class Calendrier:
         
         
     def handle_click(self, event):
+        '''permetde gérer tout le contrôle de la souris'''
         x = event.x
         y = event.y
         i = int((y+self.start_grille[1])//self.h)
@@ -85,11 +92,13 @@ class Calendrier:
                 for x in self.cases_jours:
                     for y in x:
                         if y[2] == self.month:
-                            self.canvas.itemconfig(y[0],fill  = self.fg)
+                            self.canvas.itemconfig(y[0],fill  = self.fg) #affiche en vert tout ce qui est concerné par le clic (si on clique sur le mois, tout les jours du mois deveinnent verts)
             elif x >= 5*self.w and x <= 6*self.w and y <= (self.h*0.7):
-                self.mois_precedent()
+                self.mois_precedent() #passe au mois précédent
             elif x >= 6*self.w and x <= 7*self.w and y <= self.h*0.7:
-                self.mois_prochain()
+                self.mois_prochain() #passe au mois suivant
+            elif x >= 4*self.w and x <= 5*self.w and y <= (self.h*0.7):
+                self.nouveau_event() #créer nouvel événement
             
             else:
                 for k in range(self.rows-2):
@@ -97,6 +106,7 @@ class Calendrier:
                         rect = self.cases_jours[k][j][0]
                         self.canvas.itemconfig(rect,fill  = self.fg)
         else:
+            #affiche le calendrier pour une journée
             rect = self.cases_jours[i][j][0]
             self.canvas.itemconfig(rect,fill  = self.fg)
             self.ouvrir_jour((jour,mois,annee))
@@ -119,6 +129,15 @@ class Calendrier:
     def mois_precedent(self):
         self.canvas.delete()
         NewMois = Calendrier(master = self.master,rows = self.rows-2,cols = self.cols,width = self.width,height = self.height,bg = self.bg,fg = self.fg,day = 0,month = self.offset_month-1)
+    
+    def nouveau_event(self):
+        '''Appelle la fonction ajour_event.py'''
+        subprocess.Popen("python3 ajout_event.py")
+    
+    def reload(self):
+        '''Refresh le calendrier'''
+        self.canvas.delete()
+        NewMois = Calendrier(master = self.master,rows = self.rows-2,cols = self.cols,width = self.width,height = self.height,bg = self.bg,fg = self.fg,day = 0,month = self.offset_months)
         
     
     
@@ -209,7 +228,7 @@ root = Tk()
 root.title("Grille 7x7 clickable")
 
 # créer la grille
-grille = Calendrier(master = root, rows=5, cols=7, width=400, height=350, day=0,month=1)
+grille = Calendrier(master = root, rows=5, cols=7, width=400, height=350, day=0,month=0)
 #grille = Calendrier(master = None, rows=5, cols=7, width=400, height=350, day=32-16)
 
 # démarrer la boucle principale

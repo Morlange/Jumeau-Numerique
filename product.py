@@ -9,11 +9,11 @@ class produit():
         self.tps_fin_process = 0
         self.LT = 0
         self.process = 0
-        self.etapesfaites = [0]*nb_machines
-        self.etapestpsdebut = [0]*nb_machines
-        self.etapestpsdebut[0] = self.tps_début_process
-        self.etapestpsfin = [0]*nb_machines 
-        self.tps_cycle = [0]*nb_machines
+        self.etapesfaites = [0]*nb_machines #Indique si l'étape de fabrication est finie
+        self.etapestpsdebut = [0]*nb_machines #liste des temps de lancement de debut de cycle de chaque machine
+        self.etapestpsdebut[0] = self.tps_début_process #le premier temps correspond au tout début du lancement de la production
+        self.etapestpsfin = [0]*nb_machines #liste des temps de lancement de fin de cycle de chaque machine
+        self.tps_cycle = [0]*nb_machines #temps de cycle par machine
         self.ID = rd.randint(10**5,10**6-1)
     
     def entree_machine(self,k):
@@ -52,6 +52,7 @@ class machine():
         self.En_fonctionnement = True
     
     def ajout_piece(self,pieces):
+        '''Quand on rajoute une pièce au début de la ligne de production'''
         if self.En_fonctionnement :
             self.nb_piece += 1
             self.pieces_presentes += [pieces]
@@ -61,6 +62,7 @@ class machine():
 
     
     def fin_piece(self):
+        '''Quand la pièce arrive en fin de course'''
         if self.nb_piece > 0 and self.En_fonctionnement:
             self.nb_piece -= 1
             #print(self.nb_piece,self.nom_machine)
@@ -72,6 +74,7 @@ class machine():
         return None, False
     
     def On_Off(self):
+        '''Mise en marche et arrêt de la ligne de production'''
         if self.En_fonctionnement:
             self.En_fonctionnement = False
             print("Ne fonctionne plus")

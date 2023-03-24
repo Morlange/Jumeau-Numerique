@@ -13,23 +13,43 @@ from matplotlib import pyplot as plt
 import numpy as np
 from matplotlib.patches import Circle, Wedge, Rectangle
 import time
-from data import client,LogoAM,TRS,Images_TRS,Temps_de_production,Nombre_pieces,color_bg1,color_bg,color_fg
+#importation de données situées sur d'autres fonctions
+from data import client,LogoAM,TRS,Images_TRS,Temps_de_production,Nombre_pieces,color_bg1,color_bg,color_fg,Serveur_ON
 
 
 
 def ouvrir_analyse ():
-    subprocess.Popen("python3 analyse.py")
-    subprocess.Popen("python3 analyse2.py")
-    
+    '''ouvre les programmes suivants: analyse et analyse2'''
+    subprocess.Popen("python analyse.py")
 
 def ouvrir_OF ():
-    subprocess.Popen("python3 ouvrir_OF.py")
+    '''ouvre les programmes suivants: ouvrir_OF'''
+    subprocess.Popen("python ouvrir_OF.py")
+
+def flux():
+    '''sert à appeler le programme flux'''
+    subprocess.Popen("python flux.py")
+
+def ouvrir_jum_ass():
+    '''sert à appeler le programme Jumeau_Num_Assemblage'''
+    subprocess.Popen("python Jumeau_Num_Assemblage.py")
+
+def ajout_produits():
+    subprocess.Popen("python produits.py")
+
+def ajout_machines():
+    subprocess.Popen("python ajout_suppr_machine.py")
+
+def ouvrir_calendrier():
+    subprocess.Popen("python Calendrier.py")
+
 
 
 def ouvrir_etat ():
+    '''fonction servant à déterminer si le serveur est en fonctionnement ou en veille'''
     print(Serveur_ON)
     if Serveur_ON:
-        subprocess.Popen("python3 Interface_machines.py")
+        subprocess.Popen("python Interface_machines.py")
     else :
         # creation de l'objet fenetre
         fen_Error_co= Tk()
@@ -52,10 +72,10 @@ def ouvrir_etat ():
         fen_Error_co.mainloop()
 
 def lancer_serveur():
-
+    '''Sert à lancer le serveur'''
     global Serveur_ON
     if not Serveur_ON:
-        subprocess.Popen("python3 Serveur.py")
+        subprocess.Popen("python Serveur.py")
         time.sleep(2)
         client.connect()
         print("Interface connectée")
@@ -64,7 +84,7 @@ def lancer_serveur():
         fen.update()
 
 def stop_serveur():
-#On restart le programme pour espérer arrêter le serveur
+    '''On restart le programme pour espérer arrêter le serveur'''
     global Serveur_ON
     if Serveur_ON :
         Stop = client.get_node("ns = 2; i = 16")
@@ -75,17 +95,12 @@ def stop_serveur():
         fen.update()
 
 def quitter():
+    '''On quitte le programme et on arrête le serveur'''
     if Serveur_ON :
         stop_serveur()
     fen.destroy()
 
-def flux():
-    subprocess.Popen("python3 flux.py")
 
-def ouvrir_jum_ass():
-    subprocess.Popen("python3 Jumeau_Num_Assemblage.py")
-
-    
 #Creation de l'objet fenetre
 fen= Tk()
 
@@ -93,7 +108,7 @@ fen= Tk()
 fen.title('Gestion de production')
 
 #Taille de la fenetre
-fen.geometry('1300x630')
+#fen.geometry('1300x630')
 
 #icone de fenetre
 fen.iconbitmap(LogoAM)
@@ -110,7 +125,7 @@ mon_menu.add_command(label='Etat',command=ouvrir_etat)
 mon_menu.add_command(label='OF',command=ouvrir_OF)
 mon_menu.add_command(label='Analyse',command=ouvrir_analyse)
 
-# boutons fenetre
+# création des boutons de la fenêtre
 bouton_etat = Button (fen, text = 'Etat des machines',bd=1, font=('Calibri', 12),fg=color_fg, bg = color_bg,command=ouvrir_etat)
 bouton_etat.grid(row=1, column=0, padx=40, pady=100)
 
@@ -129,6 +144,14 @@ bouton_jumeau_assemblage.grid(row=1, column=3, padx=40, pady=100)
 bouton_start_server =  Button (fen, text = 'Lancer le serveur',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=lancer_serveur)
 bouton_start_server.grid(row=2, column=1, padx=40, pady=100)
 
+bouton_ajout_produits =  Button (fen, text = 'Ajouter des produits',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=ajout_produits)
+bouton_ajout_produits.grid(row=4, column=0, padx=40, pady=100)
+
+bouton_ajout_machines =  Button (fen, text = 'Ajouter des machines',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=ajout_machines)
+bouton_ajout_machines.grid(row=4, column=1, padx=40, pady=100)
+
+bouton_ouvrir_calendrier =  Button (fen, text = 'Ouvrir le calendrier',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=ouvrir_calendrier)
+bouton_ouvrir_calendrier.grid(row=4, column=2, padx=40, pady=100)
 
 bouton_serv =  Button (fen, text = 'Stopper le serveur',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=stop_serveur)
 bouton_serv.grid(row=2, column=2, padx=40, pady=100)

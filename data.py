@@ -10,6 +10,7 @@ document = xlrd.open_workbook('OF.xls')
 nb_feuilles = document.nsheets
 OF=[]
 
+#On récupère les informations concernant la production qui sont dans un excel
 for i in range (0,nb_feuilles) :
     feuille = document.sheet_by_index(i)
     nom_produit = feuille.name
@@ -30,7 +31,6 @@ for i in range (0,nb_feuilles) :
     OF_produit=[]
     
 #forme des odres de fabrication : OF=[[nom_produit, n_OF, nom_OF, machine_OF, debut_OF,caracteristique], [nom_produit, n_OF, nom_OF, machine_OF, debut_OF,caracteristique], ...]
-
 nb_produits = len(OF)
 liste_produit =[]
 for i in range (nb_produits):

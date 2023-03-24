@@ -15,13 +15,14 @@ LogoAM = "Logo_AM.png"
 #url = "opc.tcp://10.10.53.128:4880"
 def main():
     global LogoAM
+    #on se connecte au serveur
     url = "opc.tcp://127.0.0.1:4880"
     client = Client(url)
     client.connect()
     print("Client connected")
     
 
-
+    #On récupère les données du serveur
     Etats = client.get_node("ns = 2; i = 2")
     NbPiecesMachines = client.get_node("ns = 2; i = 3")
     NbPiecesStock = client.get_node("ns = 2; i = 4")
@@ -56,7 +57,6 @@ def main():
     Label_temps_cycle_moy =[0 for i in range (nb_machine)]
     Label_Lead_Time = 0
     nom_machine= Nom_des_machines.get_value()
-
     Nb_piece_machine = NbPiecesMachines.get_value()
     Nb_piece_stockage = NbPiecesStock.get_value()
     Pieces_dans_les_machines = [[]]*nb_machine
@@ -75,16 +75,13 @@ def main():
     Nb_seq = Deb.get_value()
     print(Nb_seq)
 
-    #Initialisation d'une list d'image
+    #Initialisation d'une liste d'image
     for i in range(1,5):
         img += [ImageTk.PhotoImage(Image.open("Stock"+str(i)+".png").resize((50,50)))]
-
 
     #Initialisation du canvas Tkinter
     canv = Canvas(fen_etat, highlightthickness = 0, bg="#333333", height=1500, width=1500)
     canv.place(x=1,y=1)
-
-
 
 
     def Simpletoggle(k):
@@ -163,13 +160,13 @@ def main():
     #Les Labels s'actualisent à chaque fois qu'une pièce se termine
     print("Ah...")
     for i in range (nb_machine):
-        Label_temps_cycle[i]=Label(fen_etat,text= "Temps de cycle {0} : {1} secondes".format(nom_machine[i],Tps_cycle[i]),bd=0,font=('Times new roman', 12),fg=color_fg, bg = color_bg)
+        Label_temps_cycle[i]=Label(fen_etat,text= "Temps de cycle {0} : {1} secondes".format(nom_machine[i],Tps_cycle[i]),bd=0,font=('Times new roman', 12),fg=color_fg, bg = color_bg1)
         Label_temps_cycle[i].place(x=20,y=940-45*(1+i))
-        Label_temps_cycle_moy[i]=Label(fen_etat,text= "Temps de cycle moyen {0} : {1} secondes".format(nom_machine[i],Tc_moy[i]),bd=0,font=('Times new roman', 12),fg=color_fg, bg = color_bg)
+        Label_temps_cycle_moy[i]=Label(fen_etat,text= "Temps de cycle moyen {0} : {1} secondes".format(nom_machine[i],Tc_moy[i]),bd=0,font=('Times new roman', 12),fg=color_fg, bg = color_bg1)
         Label_temps_cycle_moy[i].place(x=500,y=940-45*(1+i))
-    Label_Lead_Time=Label(fen_etat,text='Lead Time ',bd=0,font=('Times new roman', 12),fg=color_fg, bg = color_bg)
+    Label_Lead_Time=Label(fen_etat,text='Lead Time ',bd=0,font=('Times new roman', 12),fg=color_fg, bg = color_bg1)
     Label_Lead_Time.place(x=20,y=940)
-    Label_Lead_Time_moy=Label(fen_etat,text='Lead Time moyen',bd=0,font=('Times new roman', 12),fg=color_fg, bg = color_bg)
+    Label_Lead_Time_moy=Label(fen_etat,text='Lead Time moyen',bd=0,font=('Times new roman', 12),fg=color_fg, bg = color_bg1)
     Label_Lead_Time_moy.place(x=500,y=940)
 
 
@@ -187,7 +184,6 @@ def main():
         else :  
             a=canv.create_oval(list_x[i]+15,list_y[i]+40,list_x[i]+35,list_y[i]+20,fill="grey", outline="#1e1e1e")
         Loval[i] = a
-
 
 
     #Boucle principal du programme
@@ -237,6 +233,7 @@ def main():
         
         
         if Stop:
+            #on se deconnecte du serveur
             client.disconnect()
             fen_etat.destroy()
             return "Travail terminé"

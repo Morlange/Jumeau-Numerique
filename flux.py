@@ -16,6 +16,7 @@ from opcua import Client
 
 
 def main():
+    '''sert à se connecter au serveur'''
     global LogoAM
     url = "opc.tcp://127.0.0.1:4880"
     client = Client(url)
@@ -28,6 +29,7 @@ def main():
 
 
     def flux ():
+        '''fonction créant la fenêtre'''
         # creation de l'objet fenetre
         fen_flux= Tk()
 
@@ -41,13 +43,14 @@ def main():
         fen_flux.iconbitmap('logo-AM.ico')
 
         #configuration du fond
-        fen_flux.config(background='#D3D3D3')
+        fen_flux.config(background=color_bg1)
         
-        label_titre = Label(fen_flux, text='Analyse de production', height=1,fg='black',font=('Calibri', 14),bg='#D3D3D3') 
+        #titre de la fenêtre
+        label_titre = Label(fen_flux, text='Analyse de production', height=1,fg='black',font=('Calibri', 14),fg=color_fg, bg=color_bg1) 
         label_titre.grid(row=0,column=1)
 
         #Frame TRS
-        frame_TRS = LabelFrame(fen_flux, text='TRS', font =('Calibri', 12), bg='#D3D3D3', labelanchor='nw')
+        frame_TRS = LabelFrame(fen_flux, text='TRS', font =('Calibri', 12), fg=color_fg, bg=color_bg1, labelanchor='nw')
         frame_TRS.grid(row=1,column=0)
         Label(frame_TRS, text='Flux').grid(row=1, column=0)
 
@@ -58,6 +61,8 @@ def main():
         canv = Canvas(frame_TRS, highlightthickness = 0, bg="#333333", height=size[0], width=size[1])
         canv.grid(row=0, column=0)
         canv.create_image(0,0, image = img)"""
+
+        #Importation de l'image de fond
         image = ImageTk.PhotoImage(Image.open("flux.png"))
         TempLabel = Label(fen_flux, image=image)
         TempLabel.grid(row=0,column=0) 
@@ -67,22 +72,26 @@ def main():
             
         #Choisir l'élément qui s'affiche par défaut
         listeCombo.grid(row=0, column=2,padx=0,pady=10)
+        #fen_flux.wm_attributes('-transparentcolor', fen_flux['bg'])
 
 
         def action(event):
+            """affichage des flux en fonction de la pièce choisie"""
             select = listeCombo.get()
 
             affichage= NbPiecesMachines.get_value()
             print(affichage)
             #Liste_machines=["Four", "Coulée","Usinage","Assemblage"]
+            #coordonnées des machines sur l'image (référentiel fenêtre)
             coordonnées_machines=[[100,100],[200,200],[200,100],[100,200]]
             label_nbpiece = [None for i in range(len(affichage))]
+            #création de l'affichage
             for i in range (len(affichage)):
-                label_nbpiece[i] = Label(fen_flux,text=affichage[i],height=1,font=('Calibri',14),fg=color_bg, bg='transparentcolor')
+                label_nbpiece[i] = Label(fen_flux,text=affichage[i],height=1,font=('Calibri',14),fg=color_bg)
                 label_nbpiece[i].place(x=coordonnées_machines[i][0], y=coordonnées_machines[i][1])
                 print('action lancée')
 
-
+        #si on séléctionne un pièce dans la liste déroulante, on ordonne la fonction "action"
         listeCombo.bind("<<ComboboxSelected>>", action) 
     
         fen_flux.mainloop()
