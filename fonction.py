@@ -6,6 +6,9 @@ from matplotlib import cm
 from matplotlib.pyplot import subplots, tight_layout, savefig
 from matplotlib.patches import Circle, Wedge, Rectangle
 from data import color_bg1
+from tkinter import Tk,Label
+
+
 
 def afficher_Image(fen,row,column,name,size,Images):
     '''Retourne une image png
@@ -19,7 +22,9 @@ def afficher_Image(fen,row,column,name,size,Images):
     fen.update()
     return Images
 
-def creerGraphsTRS(x,name):
+
+
+def creerGraphsTRS(x,name,titre = "Titre du graphique"):
     '''Sert à afficher la valeur du TRS'''
     #x valeur en pourcentage
     TRSgraph=[]
@@ -133,6 +138,6 @@ def creerGraphsTRS(x,name):
     image=gauge(labels=['0',' ','10',' ','20',' ','30',' ','40',' ','50',' ','60',' ','70',' ','80',' ','90',' ','100'], \
         colors=['#ED1C24','#ED1C24','#ED1C24','#ED1C24','#ED1C24','#FFCC00','#FFCC00','#FFCC00','#FFCC00','#FFCC00',
                 '#FFCC00','#FFCC00','#FFCC00','#FFCC00','#FFCC00','#FFCC00','#007A00','#007A00','#007A00','#007A00',
-                '#007A00'], arrow=TRSgraph[0], title='TRS fonderie')
+                '#007A00'], arrow=TRSgraph[0], title=titre)
     
     savefig(namefile, transparent = True)

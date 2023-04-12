@@ -7,41 +7,54 @@ from tkinter import ttk
 from tkinter.messagebox import showinfo
 import xlrd
 import xlsxwriter
-import subprocess
 from matplotlib import cm
 from matplotlib import pyplot as plt
 import numpy as np
 from matplotlib.patches import Circle, Wedge, Rectangle
 import time
-#importation de données situées sur d'autres fonctions
+#importation de données situées sur d'autres fonctions et des autres programmes
 from data import client,LogoAM,TRS,Images_TRS,Temps_de_production,Nombre_pieces,color_bg1,color_bg,color_fg,Serveur_ON
+import produits
+import ajout_suppr_machine
+import ouvrir_OF
+import flux
+import Jumeau_Num_Assemblage
+import analyse
+import Calendrier
+import Interface_machines
+import Serveur
+import Pop_up
+import image
 
 
 
 def ouvrir_analyse ():
     '''ouvre les programmes suivants: analyse et analyse2'''
-    subprocess.Popen("python analyse.py")
+    analyse.main()
 
 def ouvrir_OF ():
     '''ouvre les programmes suivants: ouvrir_OF'''
-    subprocess.Popen("python ouvrir_OF.py")
+    ouvrir_OF.main()
 
-def flux():
+def appel_flux():
     '''sert à appeler le programme flux'''
-    subprocess.Popen("python flux.py")
+    img = Pop_up.main("Hello world",image_info)
+    flux.main()
 
 def ouvrir_jum_ass():
     '''sert à appeler le programme Jumeau_Num_Assemblage'''
-    subprocess.Popen("python Jumeau_Num_Assemblage.py")
+    Jumeau_Num_Assemblage.main()
 
 def ajout_produits():
-    subprocess.Popen("python produits.py")
+    produits.main()
+    #subprocess.Popen("python produits.py")
 
 def ajout_machines():
-    subprocess.Popen("python ajout_suppr_machine.py")
+    ajout_suppr_machine.main()
+    #subprocess.Popen("python ajout_suppr_machine.py")
 
 def ouvrir_calendrier():
-    subprocess.Popen("python Calendrier.py")
+    Calendrier.main()
 
 
 
@@ -49,7 +62,7 @@ def ouvrir_etat ():
     '''fonction servant à déterminer si le serveur est en fonctionnement ou en veille'''
     print(Serveur_ON)
     if Serveur_ON:
-        subprocess.Popen("python Interface_machines.py")
+        Interface_machines.main()
     else :
         # creation de l'objet fenetre
         fen_Error_co= Tk()
@@ -75,13 +88,17 @@ def lancer_serveur():
     '''Sert à lancer le serveur'''
     global Serveur_ON
     if not Serveur_ON:
-        subprocess.Popen("python Serveur.py")
-        time.sleep(2)
-        client.connect()
-        print("Interface connectée")
-        Serveur_ON = True
-        label_etat_serv.configure(text="Etat du serveur : Connecté")
-        fen.update()
+        Serveur.main()
+
+def check_serveur():
+    '''Sert à vérifier que le serveur est allumé'''
+    global Serveur_ON
+    client.connect()
+    print("Interface connectée")
+    Serveur_ON = True
+    label_etat_serv.configure(text="Etat du serveur : Connecté")
+    fen.update()
+    
 
 def stop_serveur():
     '''On restart le programme pour espérer arrêter le serveur'''
@@ -94,7 +111,7 @@ def stop_serveur():
         label_etat_serv.configure(text="Etat du serveur : Déconnecté")
         fen.update()
 
-def quitter():
+def quitter(event = None):
     '''On quitte le programme et on arrête le serveur'''
     if Serveur_ON :
         stop_serveur()
@@ -127,43 +144,49 @@ mon_menu.add_command(label='Analyse',command=ouvrir_analyse)
 
 # création des boutons de la fenêtre
 bouton_etat = Button (fen, text = 'Etat des machines',bd=1, font=('Calibri', 12),fg=color_fg, bg = color_bg,command=ouvrir_etat)
-bouton_etat.grid(row=1, column=0, padx=40, pady=100)
+bouton_etat.grid(row=1, column=0, padx=40 ,pady=10)
 
-bouton_flux =  Button (fen,text='Affichage du flux', bd=1, font=('Calibri', 12),fg=color_fg, bg = color_bg,command=flux)
-bouton_flux.grid(row=3, column=1, padx=40,pady=100)
+bouton_flux =  Button (fen,text='Affichage du flux', bd=1, font=('Calibri', 12),fg=color_fg, bg = color_bg,command=appel_flux)
+bouton_flux.grid(row=3, column=1, padx=40,pady=10)
 
-bouton_OF =  Button (fen, text = 'Ordres de fabrication',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=ouvrir_OF)
-bouton_OF.grid(row=1, column=1, padx=40, pady=100)
+bouton_OF =  Button (fen, text = 'Gammes de fabrication',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=ouvrir_OF)
+bouton_OF.grid(row=1, column=1, padx=40 ,pady=10)
 
 bouton_analyse =  Button (fen, text = 'Analyse de production',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=ouvrir_analyse)
-bouton_analyse.grid(row=1, column=2, padx=40, pady=100)
+bouton_analyse.grid(row=1, column=2, padx=40,pady=10 )
 
 bouton_jumeau_assemblage =  Button (fen, text = 'Jumeau Numérique Assemblage',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=ouvrir_jum_ass)
-bouton_jumeau_assemblage.grid(row=1, column=3, padx=40, pady=100)
+bouton_jumeau_assemblage.grid(row=1, column=3, padx=40 ,pady=10)
 
 bouton_start_server =  Button (fen, text = 'Lancer le serveur',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=lancer_serveur)
-bouton_start_server.grid(row=2, column=1, padx=40, pady=100)
+bouton_start_server.grid(row=2, column=1, padx=40 ,pady=10)
+
+bouton_start_server =  Button (fen, text = 'Vérifier le serveur',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=check_serveur)
+bouton_start_server.grid(row=2, column=2, padx=40 ,pady=10)
 
 bouton_ajout_produits =  Button (fen, text = 'Ajouter des produits',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=ajout_produits)
-bouton_ajout_produits.grid(row=4, column=0, padx=40, pady=100)
+bouton_ajout_produits.grid(row=3, column=0, padx=40,pady=10 )
 
 bouton_ajout_machines =  Button (fen, text = 'Ajouter des machines',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=ajout_machines)
-bouton_ajout_machines.grid(row=4, column=1, padx=40, pady=100)
+bouton_ajout_machines.grid(row=4, column=1, padx=40,pady=10 )
 
 bouton_ouvrir_calendrier =  Button (fen, text = 'Ouvrir le calendrier',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=ouvrir_calendrier)
-bouton_ouvrir_calendrier.grid(row=4, column=2, padx=40, pady=100)
+bouton_ouvrir_calendrier.grid(row=4, column=0, padx=40,pady=10 )
 
 bouton_serv =  Button (fen, text = 'Stopper le serveur',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=stop_serveur)
-bouton_serv.grid(row=2, column=2, padx=40, pady=100)
+bouton_serv.grid(row=2, column=3, padx=40,pady=10)
 
 label_etat_serv = Label(fen, text='Etat du serveur : Déconnecté', height=2,font=('Calibri', 14),fg=color_fg, bg = color_bg1)
-label_etat_serv.grid(row=2, column=0, padx=40, pady=100)
+label_etat_serv.grid(row=2, column=0, padx=40,pady=10 )
 
 bouton_quitter =  Button (fen, text = 'Quitter',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=quitter)
-bouton_quitter.grid(row=3, column=0, padx=40, pady=40)
+bouton_quitter.grid(row=4, column=2, padx=40, pady=10)
 
-
+fen.protocol("WM_DELETE_WINDOW", quitter)
 #Boucle d'affichage
+
+image_info = Image.open("info.png").resize((50,50))
+
 fen.mainloop()
 
 

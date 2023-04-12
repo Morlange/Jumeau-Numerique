@@ -15,6 +15,7 @@ class produit():
         self.etapestpsfin = [0]*nb_machines #liste des temps de lancement de fin de cycle de chaque machine
         self.tps_cycle = [0]*nb_machines #temps de cycle par machine
         self.ID = rd.randint(10**5,10**6-1)
+        
     
     def entree_machine(self,k):
         self.etapestpsdebut[k] = time.time()

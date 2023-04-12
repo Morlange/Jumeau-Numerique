@@ -1,7 +1,9 @@
 #importation des bibliothèques
 from tkinter import Tk, Canvas
 from datetime import datetime, timedelta, date
-import subprocess
+
+import ajout_event
+import suppr_event
 
 class Calendrier:
     def __init__(self, master = None, rows=5, cols=7, width=400, height=400, bg="white", fg="green", day = 0, month = 0,grid = (0,0)):
@@ -132,7 +134,7 @@ class Calendrier:
     
     def nouveau_event(self):
         '''Appelle la fonction ajour_event.py'''
-        subprocess.Popen("python3 ajout_event.py")
+        ajout_event.main()
     
     def reload(self):
         '''Refresh le calendrier'''
@@ -223,13 +225,17 @@ def lecture_planning_jour(name,date):
     planned.close()
     return planned_event
 
-# créer la fenêtre principale
-root = Tk()
-root.title("Grille 7x7 clickable")
+def main():
+    # créer la fenêtre principale
+    root = Tk()
+    root.title("Grille 7x7 clickable")
 
-# créer la grille
-grille = Calendrier(master = root, rows=5, cols=7, width=400, height=350, day=0,month=0)
-#grille = Calendrier(master = None, rows=5, cols=7, width=400, height=350, day=32-16)
+    # créer la grille
+    grille = Calendrier(master = root, rows=5, cols=7, width=400, height=350, day=0,month=0)
+    #grille = Calendrier(master = None, rows=5, cols=7, width=400, height=350, day=32-16)
 
-# démarrer la boucle principale
-root.mainloop()
+    # démarrer la boucle principale
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()

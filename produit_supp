@@ -4,25 +4,20 @@ import tkinter
 from tkinter import *
 from tkinter import ttk
 from data import color_bg1,color_bg,color_fg
-from PIL import Image, ImageTk
-import Pop_up
 # A FAIRE :
 # - commenter le code
 # - mettre "ajout de ligne"
 # - rendre joli
 # - machine avec liste dans ajout produit
-nombre_operation = 1
-Images_Temps = []
-info_image = Image.open("info.png").resize((50,50))
+
 
 def main():
-    global nombre_operation
     #ouverture du fichier en lecture
     liste_machine=open('liste_machine.txt', 'r')
     l=liste_machine.readlines()
     machine=[]
     nom_machine=[]
-    zone_machine=['Composite', 'Usinage', 'Forge','Metrologie','Assemblage','Bois','Fonderie']
+    zone_machine=['Composite', 'Usinage', 'Forge','Usinage','Metrologie','Assemblage','Bois','Fonderie']
     
     ############# #import du document ####################
     document = op.load_workbook('OF.xlsx')
@@ -103,10 +98,10 @@ def main():
         scrollbar.grid(row=2, column=3, sticky=N+S)
         
         
-        style = ttk.Style(fen_produit)
-        style.theme_use("winnative")  # Charger un thème pour pouvoir accéder aux éléments de style
-        style.configure("Treeview", background=color_bg1, foreground="white", fieldbackground=color_bg1)
-        style.map("Treeview", background=[("selected", "#0066CC")], foreground=[("selected", "white")])
+        #style = ttk.Style(fen_produit)
+        #style.theme_use("winnative")  # Charger un thème pour pouvoir accéder aux éléments de style
+        #style.configure("Treeview", background=color_bg1, foreground="white", fieldbackground=color_bg1)
+        #style.map("Treeview", background=[("selected", "#0066CC")], foreground=[("selected", "white")])
         
         #définir le tableau et joindre avec le mouvement de la scrollbar 
         tableau = ttk.Treeview(fen_produit, columns=('gamme_fabrication', 'nom_operation', 'machine', 'temps_fabrication'),show='headings',yscrollcommand = scrollbar.set)
@@ -158,62 +153,45 @@ def main():
     
 
     def ouvrir_fen_nouveau_produit():
+        nombre_operation = 1
 
-        def ajout_produit():
+        def ajout_produit(nombre_operation):
         #Dernier bouton qui ajoute véritablement dans l'excel
             
         # Gestion du fichier excel
-            global nombre_operation
-            wb = op.load_workbook('OF.xlsx')
-            wb.create_sheet(title=nom_prod.get())
-            sheet = wb[nom_prod.get()]
-            sheet['A1'] = 'Coût (€)'
-            sheet['B1'] = int(cout.get())
-            sheet['A2'] = 'Resistance (MPa)'
-            sheet['B2'] = int(resistance.get())
-            sheet['A3'] = 'Temps de cycle moyen (min) '
-            sheet['B3'] = int(temps.get())
-            sheet['A4'] = 'Gamme fabrication'
-            sheet['B4'] = 'Nom operation'
-            sheet['C4'] = 'Machine'
-            sheet['D4'] = 'Temps fabrication'
-            
-            for i in range(nombre_operation):
-                a=liste_N_OP[i].get()
-                b=liste_nom_OP[i].get()
-                c=liste_machine_OP[i].get()
-                d=liste_temps_fab_OP[i].get()
-
-                sheet['A{}'.format(i+5)] = a
-                sheet['B{}'.format(i+5)] = b
-                sheet['C{}'.format(i+5)] = c
-                sheet['D{}'.format(i+5)] = d
-            
-            wb.save('OF.xlsx')
-            nouvelle_operation = 1
                 
+                wb = op.load_workbook('OF.xlsx')
+                wb.create_sheet(title=nom_prod.get())
+                sheet = wb[nom_prod.get()]
+                sheet['A1'] = 'Coût (€)'
+                sheet['B1'] = int(cout.get())
+                sheet['A2'] = 'Resistance (MPa)'
+                sheet['B2'] = int(resistance.get())
+                sheet['A3'] = 'Temps de cycle moyen (min) '
+                sheet['B3'] = int(temps.get())
+                sheet['A4'] = 'Gamme fabrication'
+                sheet['B4'] = 'Nom operation'
+                sheet['C4'] = 'Machine'
+                sheet['D4'] = 'Temps fabrication'
+                
+                for i in range(nombre_operation):
+                    a=liste_N_OP[i].get()
+                    b=liste_nom_OP[i].get()
+                    c=liste_machine_OP[i].get()
+                    d=liste_temps_fab_OP[i].get()
+
+                    sheet['A{}'.format(i+5)] = a
+                    sheet['B{}'.format(i+5)] = b
+                    sheet['C{}'.format(i+5)] = c
+                    sheet['D{}'.format(i+5)] = d
+                
+                wb.save('OF.xlsx')
+                fenetre.destroy()
+                fen_produit.destroy()
                 
                 #return (liste_N_OP, liste_nom_OP, liste_machine_OP, liste_temps_fab_OP)
             
-        def ajout_produit_bouton():
-            global Images_Temps,info_image
-            try : 
-                ajout_produit()
-            except KeyError:
-                
-                Images_Temps = [Pop_up.main("Veuillez mettre un nom pour le produit",info = True)]
-
-            fenetre.destroy()
-            ouvrir_fen_nouveau_produit()
-        
-        def fermer_ajout_produit():
-            global nouvelle_operation
-            fenetre.destroy()
-            fen_produit.destroy()
-            nouvelle_operation = 1
-            main()
-        
-        
+            
 
         fenetre = tk.Tk()
         fenetre.title('Ajouter un nouveau produit')
@@ -274,16 +252,12 @@ def main():
             liste_machine_OP.append (machine_OP)
             liste_temps_fab_OP.append (temps_fab_OP)
 
-        bouton_ajout_OP = tk.Button (fenetre, text = 'Ajouter une operation', fg=color_fg, bg=color_bg,command=nouvelle_operation)
+        bouton_ajout_OP = tk.Button (fenetre, text = 'Ajouter une operation', fg=color_fg, bg=color_bg,command=lambda : nouvelle_operation(nombre_operation))
         bouton_ajout_OP.grid(row=99, column=2)
 
         
 
-        tk.Button(fenetre, text='Ajouter le produit',fg=color_fg, bg=color_bg, command=ajout_produit_bouton).grid(row=100, column=2, sticky=tk.W)
-        tk.Button(fenetre, text='Fermer',fg=color_fg, bg=color_bg, command=fermer_ajout_produit).grid(row=100,column=1, sticky=tk.W)
-
-        fenetre.bind()
-
+        tk.Button(fenetre, text='Ajouter le produit',fg=color_fg, bg=color_bg, command=lambda : ajout_produit(nombre_operation)).grid(row=100, column=2, sticky=tk.W)
         tk.mainloop()
 
     # Ajout d'un produit
@@ -301,8 +275,6 @@ def main():
     listeCombo.grid(row=1, column=1,padx=0,pady=10)
 
     listeCombo.bind("<<ComboboxSelected>>", action)   
-    
-    
         
 
     #Boucle d'affichage

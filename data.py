@@ -1,7 +1,6 @@
 import xlrd
 from opcua import Client
 
-
 LogoAM = "logo-AM.ico"
 
 #données OF

@@ -1,34 +1,26 @@
 from PIL import Image, ImageTk
-from tkinter import Label, Tk, Canvas, Menu, Entry, N, S, VERTICAL, LabelFrame, Button
+from tkinter import Label, Tk, Canvas, NW
 from tkinter import ttk
 from tkinter.messagebox import showinfo
-import xlrd
-import xlsxwriter
-import subprocess
-from matplotlib import cm
-from matplotlib import pyplot as plt
-import numpy as np
-from matplotlib.patches import Circle, Wedge, Rectangle
-import time
-from data import LogoAM, nb_produits, liste_produit, OF, color_bg1, color_bg, color_fg
+from data import LogoAM, liste_produit, color_bg1, color_bg, color_fg
 from opcua import Client
 
 
+imageflux_RDC=Image.open("Flux_RDC.png")
+imageflux_1er=Image.open("Flux_1er.png")
 
 def main():
     '''sert à se connecter au serveur'''
-    global LogoAM
+    """global LogoAM
     url = "opc.tcp://127.0.0.1:4880"
     client = Client(url)
     client.connect()
     print("Client connected")
 
-    NbPiecesMachines = client.get_node("ns = 2; i = 3")
-
-    
+    NbPiecesMachines = client.get_node("ns = 2; i = 3")"""
 
 
-    def flux ():
+    def afficher_flux ():
         '''fonction créant la fenêtre'''
         # creation de l'objet fenetre
         fen_flux= Tk()
@@ -46,13 +38,12 @@ def main():
         fen_flux.config(background=color_bg1)
         
         #titre de la fenêtre
-        label_titre = Label(fen_flux, text='Analyse de production', height=1,fg='black',font=('Calibri', 14),fg=color_fg, bg=color_bg1) 
+        label_titre = Label(fen_flux, text='Analyse de production', height=1,font=('Calibri', 14),fg=color_fg, bg=color_bg1) 
         label_titre.grid(row=0,column=1)
 
-        #Frame TRS
-        frame_TRS = LabelFrame(fen_flux, text='TRS', font =('Calibri', 12), fg=color_fg, bg=color_bg1, labelanchor='nw')
-        frame_TRS.grid(row=1,column=0)
-        Label(frame_TRS, text='Flux').grid(row=1, column=0)
+
+        label_Flux = Label(fen_flux, text='Flux', font =('Calibri', 12), fg=color_fg, bg=color_bg1)
+        Label(label_Flux, text='Flux').grid(row=1, column=0)
 
         #def afficher_Image(fen,row,column,name,size):
         """
@@ -63,35 +54,68 @@ def main():
         canv.create_image(0,0, image = img)"""
 
         #Importation de l'image de fond
-        image = ImageTk.PhotoImage(Image.open("flux.png"))
-        TempLabel = Label(fen_flux, image=image)
-        TempLabel.grid(row=0,column=0) 
+        #image = ImageTk.PhotoImage(Image.open("flux.png"))
+        imaged=Canvas(fen_flux,bg=color_bg, width=585,height=400)
+        image1 = ImageTk.PhotoImage(imageflux_RDC)
+        image2 = ImageTk.PhotoImage(imageflux_1er)
+        logo1 = imaged.create_image(0,0, anchor = NW, image = image1)
+        imaged.grid(row=1,column=1)
+        imageg=Canvas(fen_flux,bg=color_bg, width=576,height=400)
+        logo2 = imageg.create_image(0,0, anchor = NW, image = image2)
+        imageg.grid(row=1,column=0)
+        # TempLabel2 = Label(fen_flux, image=image2)
+        # TempLabel2.grid(row=1,column=2,padx=20,pady=20) 
+        # TempLabel1 = Label(fen_flux, image=image1)
+        # TempLabel1.grid(row=1,column=1,padx=20,pady=20) 
         
         #Création de la Combobox
         listeCombo = ttk.Combobox(fen_flux, values=liste_produit)
             
         #Choisir l'élément qui s'affiche par défaut
-        listeCombo.grid(row=0, column=2,padx=0,pady=10)
-        #fen_flux.wm_attributes('-transparentcolor', fen_flux['bg'])
+        listeCombo.grid(row=4, column=1, padx=10,pady=10)
+        
 
 
         def action(event):
             """affichage des flux en fonction de la pièce choisie"""
             select = listeCombo.get()
 
-            affichage= NbPiecesMachines.get_value()
+            #affichage= NbPiecesMachines.get_value()
+            affichage=[1,2,3,4,5,6,7]
             print(affichage)
-            #Liste_machines=["Four", "Coulée","Usinage","Assemblage"]
+            #Liste_lieux=["composite","usinage","forge","metrologie","assemblage","bois","fonderie"]
             #coordonnées des machines sur l'image (référentiel fenêtre)
-            coordonnées_machines=[[100,100],[200,200],[200,100],[100,200]]
+            coordonnées_zones=[[500,65],[310,65],[477,325],[130,65],[210,65],[400,65],[380,140]]
             label_nbpiece = [None for i in range(len(affichage))]
             #création de l'affichage
             for i in range (len(affichage)):
-                label_nbpiece[i] = Label(fen_flux,text=affichage[i],height=1,font=('Calibri',14),fg=color_bg)
-                label_nbpiece[i].place(x=coordonnées_machines[i][0], y=coordonnées_machines[i][1])
-                print('action lancée')
+                label_nbpiece[i] = imageg.create_text(coordonnées_zones[i][0],coordonnées_zones[i][1],text=affichage[i], fill = 'black' ,font=("Calibri",14))
+                #canv.create_text(list_x[i],list_y[i],text=nom_machine[i], fill = "#dcdcaa")
+                
+            def trait (coord0,coord1):
+                x0,y0=coord0
+                x1,y1=coord1
+                decalage=6
+                if x0>x1:
+                    x0=x0-decalage
+                    x1=x1+decalage
+                elif x0<x1:
+                    x0=x0+decalage
+                    x1=x1-decalage                
+                if y0>y1:
+                    y0=y0-decalage
+                    y1=y1+decalage
+                elif y0<y1:
+                    y0=y0+decalage
+                    y1=y1-decalage
 
-        #si on séléctionne un pièce dans la liste déroulante, on ordonne la fonction "action"
+                imageg.create_line(x0, y0, x1, y1, width=2)
+
+            trait(coordonnées_zones[1],coordonnées_zones[2])
+            trait(coordonnées_zones[1],coordonnées_zones[6])
+            trait(coordonnées_zones[3],coordonnées_zones[4])
+            trait(coordonnées_zones[4],coordonnées_zones[1])
+        #si on sélectionne un pièce dans la liste déroulante, on ordonne la fonction "action"
         listeCombo.bind("<<ComboboxSelected>>", action) 
     
         fen_flux.mainloop()
@@ -100,5 +124,6 @@ def main():
 
     
 
-    flux()
-main()
+    afficher_flux()
+if __name__ == "__main__":
+    main()

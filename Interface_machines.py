@@ -265,5 +265,6 @@ except ConnectionRefusedError :
     label_titre.grid(row=0,column=0, padx=10, pady=75)
 
     fen_Error_co.mainloop()"""
-main()
+if __name__ == "__main__":
+    main()
 
