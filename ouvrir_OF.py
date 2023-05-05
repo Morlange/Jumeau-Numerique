@@ -1,6 +1,6 @@
 from tkinter import Tk, Label, VERTICAL, N, S, ttk, END, LabelFrame, Button, Entry
 import xlsxwriter
-from data import LogoAM, nb_produits, liste_produit, OF, color_bg1, color_bg, color_fg
+from data import LogoAM, nombre_produits, nom_produits, OF, color_bg1, color_bg, color_fg
 
 
 def main():
@@ -52,8 +52,8 @@ def main():
         #definition de chaque tableau en fonction des produits
         OFs=[]
 
-        for i in range (nb_produits) :
-            if str(select)==liste_produit[i] :
+        for i in range (nombre_produits) :
+            if str(select)==nom_produits[i] :
                 caracteristique_produit=OF[i][5]
                 for j in range (len(OF[i][1])):
                     OFs.append((OF[i][1][j], OF[i][2][j], OF[i][3][j], OF[i][4][j]))
@@ -163,7 +163,7 @@ def main():
     label_choix.grid(row=1, column=0, padx=0, pady=10)
 
     #Création de la Combobox
-    listeCombo = ttk.Combobox(fen_OF, values=liste_produit)
+    listeCombo = ttk.Combobox(fen_OF, values=nom_produits)
         
     #Choisir l'élément qui s'affiche par défaut
     listeCombo.grid(row=1, column=1,padx=0,pady=10)

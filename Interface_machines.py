@@ -1,12 +1,13 @@
-from tkinter import Button, Canvas, Tk, Label, PhotoImage, CENTER, LAST
+from tkinter import Button, Canvas, Tk, Label, PhotoImage, CENTER, LAST, Menu
 from functools import partial
 from opcua import Client
 from opcua import Node
 from product import produit, machine
 from PIL import Image, ImageTk
 from tkinter import ttk
-from data import color_bg1, color_bg, color_fg
-
+from data import color_bg1, color_bg, color_fg, Gammes
+import time
+import subprocess
 
 LogoAM = "Logo_AM.png"
 
@@ -37,6 +38,8 @@ def main():
     Lead_Time_moy_node = client.get_node("ns = 2; i = 15")
     Deb = client.get_node("ns = 2; i = 5")
     Stop_serv = client.get_node("ns = 2; i = 16")
+    Gammes_actuelles = client.get_node("ns = 2; i = 17")
+    Demande_chgt_gamme = client.get_node("ns = 2; i = 18")
 
     #Initialisation de la fenêtre Tkinter
     fen_etat=Tk()
@@ -44,7 +47,8 @@ def main():
     fen_etat.config(bg="#333333")
     fen_etat.title("Etat des machines")
 
-    #Initialisation des différentes variables 
+    #Initialisation des différentes variables
+    liste_gammes = [Gammes[k].nom_produit for k in range(len(Gammes))]
     nb_machine=Nb_Machines.get_value()
     list_etat=Etats.get_value()
     list_x=[200*(i+1) for i in range(nb_machine)]
@@ -80,9 +84,23 @@ def main():
         img += [ImageTk.PhotoImage(Image.open("Stock"+str(i)+".png").resize((50,50)))]
 
     #Initialisation du canvas Tkinter
-    canv = Canvas(fen_etat, highlightthickness = 0, bg="#333333", height=1500, width=1500)
+    canv = Canvas(fen_etat, highlightthickness = 0, bg=color_bg1, height=1500, width=1500)
     canv.place(x=1,y=1)
 
+    Label(fen_etat, text="Gamme choisie :", font=('Times new roman', 12),fg=color_fg, bg=color_bg1).place(x = 150, y = 10)
+
+    def action(event):
+        select = listeGammes.get()
+        Gammes_actuelles.set_value(Gammes[liste_gammes.index(select)].nom_produit)
+        Demande_chgt_gamme.set_value(1)
+        fen_etat.destroy()
+        time.sleep(2)
+        main()
+
+    listeGammes = ttk.Combobox(fen_etat, values=liste_gammes)
+    listeGammes.place(x = 300, y = 10)
+    listeGammes.current(liste_gammes.index(Gammes_actuelles.get_value()))
+    listeGammes.bind("<<ComboboxSelected>>", action)
 
     def Simpletoggle(k):
         """Changement bouton ON/OFF de chaque machine"""
@@ -126,6 +144,26 @@ def main():
         canv.create_text(list_x[i],list_y[i],text=nom_machine[i], fill = "#dcdcaa")
         bouton_urgence[i] = Button(fen_etat, text="ON",bd=1,font=('Times new roman', 12),fg='white', bg = 'olivedrab', command=partial(Simpletoggle,i), width = 4)
         bouton_urgence[i].place(x=list_x[i] - 2*9 ,y=list_y[i]-40)
+    
+    #flux
+    def appel_flux(): 
+        subprocess.Popen("python flux.py")
+
+    #Analyse
+    def ouvrir_analyse(): 
+        subprocess.Popen("python analyse.py")
+    
+
+    menu_interface=Menu(fen_etat)
+    fen_etat.config(menu=menu_interface)
+    menu_interface.add_command(label='Flux',command=appel_flux)
+    menu_interface.add_command(label='Analyse',command=ouvrir_analyse)
+
+    bouton_flux = Button(fen_etat, text="Flux",bd=1,font=('Times new roman', 12),fg=color_fg, bg = color_bg, command=appel_flux, width = 4)
+    bouton_flux.place(x=500 ,y=10)
+    bouton_flux = Button(fen_etat, text="Analyse",bd=1,font=('Times new roman', 12),fg=color_fg, bg = color_bg, command=ouvrir_analyse, width = 4)
+    bouton_flux.place(x=550 ,y=10)
+
 
     """
     #Création des bouton relatifs au machines E/S
@@ -265,6 +303,9 @@ except ConnectionRefusedError :
     label_titre.grid(row=0,column=0, padx=10, pady=75)
 
     fen_Error_co.mainloop()"""
+
+
+
 if __name__ == "__main__":
     main()
 

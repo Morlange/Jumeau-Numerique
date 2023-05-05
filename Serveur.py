@@ -5,9 +5,23 @@ from random import randint,random,choice
 import datetime
 from product import produit, machine
 from tkinter import Tk,Label
+from data import Gammes
 
 
 def main():
+    #Définition de l'initialisation
+    global Nouvelles_pieces_finies, Nb_piece_finies
+    
+    def initialisation(Gamme_de_produit):
+        #Gamme de gamme
+        Nom_machines = Gamme_de_produit.nom_process
+        Nb_Machines = len(Gamme_de_produit.nom_process)
+        Nb_Stock = Nb_Machines-1
+        Temps_cycle_idel = [float(Gamme_de_produit.temps_par_machine[k]) for k in range(len(Gamme_de_produit.temps_par_machine))] 
+        Temps_transport = [5]*(Nb_Machines-1)
+        Taille_Kanban = 10
+        Nb_OF = 30
+        return [Nom_machines, Nb_Machines,Nb_Stock,Temps_cycle_idel,Temps_transport,Taille_Kanban,Nb_OF]
     
 
     #Création du serveur pour le protocole OPC UA
@@ -35,18 +49,16 @@ def main():
     Nb_seq = 0
     prec_time = time.time()
     Tech = 0.1
-    Nb_Machines = 4
-    Nom_machines = ["Four", "Coulée","Usinage","Assemblage","Métrologie"]
-    Nb_Stock = Nb_Machines-1
-    Temps_cycle_idel = [3,2,4,2]+[2]*(Nb_Machines-4)
-    Temps_transport = [5]*(Nb_Machines-1)
-    Taille_Kanban = 10
-    Nb_OF = 30
+    
     Nb_piece_finies = 0
     Nouvelles_pieces_finies = 0
     epsi_M = 0.1
     epsi_T = 0.1
     OF_en_cours = False
+
+    Nom_machines, Nb_Machines,Nb_Stock,Temps_cycle_idel,Temps_transport,Taille_Kanban,Nb_OF = initialisation(Gammes[1])
+    print(Temps_cycle_idel)
+    Gamme_actuelle = Gammes[1]
 
     Timer_machine = [0]*Nb_Machines
     Timer_Stock = [0]*Nb_Stock
@@ -69,7 +81,6 @@ def main():
     Lead_Time = [0]
     OF_fait = 0
 
-    #Espaces de créations des différentes fonctions
 
     def entree_machines(k):
         """Fonction pour une pièce qui entre dans la machine k
@@ -102,7 +113,7 @@ def main():
                 Pieces_dans_les_machines[k].pop(Pieces_dans_les_machines[k].index(Piece))
                 Piece.sortie_machine(k)
                 Nb_piece_Stock[k] += 1
-                Pieces_dans_les_stockages[k] += [Piece]
+                Pieces_dans_les_stockages[k].append(Piece)
                 List_stock_a_update[k] = 1
             else :
                 print("La machine ne fonctionne pas !!! Err:02")
@@ -112,8 +123,8 @@ def main():
         Si l'état de la machine est sur OFF alors il n'est pas possible 
         de lancer la fabrication de cette pièce.
         """
-        global Pieces_dans_les_machines
-        Pieces_dans_les_machines[0] += [produit(nb_machines=Nb_Machines)]
+        #global Pieces_dans_les_machines
+        Pieces_dans_les_machines[0].append(produit(nb_machines=Nb_Machines))
         if Machines[0].En_fonctionnement:
             Machines[0].ajout_piece(Pieces_dans_les_machines[0][-1])
         else:
@@ -126,12 +137,12 @@ def main():
         Si l'état de la machine est sur OFF alors il n'est pas possible 
         de lancer la fabrication de cette pièce.
         """
-        global Nouvelles_pieces_finies,Values,Nb_piece_finies, Pieces_finies
+        global Nouvelles_pieces_finies,Nb_piece_finies
         
         if Machines[-1].En_fonctionnement:
             Piece, Etat_fonctionnement = Machines[-1].fin_piece()
-            Values += [Pieces_dans_les_machines[-1].pop(0).fin_process()]
-            Pieces_finies += [Piece]
+            Values.append(Pieces_dans_les_machines[-1].pop(0).fin_process())
+            Pieces_finies.append(Piece)
             Nouvelles_pieces_finies += 1
             Nb_piece_finies += 1
         else :
@@ -147,7 +158,56 @@ def main():
             Machines[k].On_Off()
         
         return None
+    
+    def ChangementdeGamme(Nouv_gamme):
+        """Pour changer de gamme, on rdéfinit les variables et le les variables du serveur """
+        global Nom_machines,Temps_cycle_idel,Temps_transport,Taille_Kanban,Timer_machine,Timer_Stock,Etats_M,Etats_T,Machines,Nb_piece_Stock,Nb_piece_Machine,Pieces_dans_les_stockages,Pieces_dans_les_machines,List_stock_a_update
+        global Switch_Etat,Values,Pieces_finies,Lead_Time_moy,TC_moy,Tps_cycle,Lead_Time,OF_fait
+        serveur.stop()
+
+        liste_nom_gammes = [Gammes[k].nom_produit for k in range(len(Gammes))]
+        Nom_machines, Nb_Machines,Nb_Stock,Temps_cycle_idel,Temps_transport,Taille_Kanban,Nb_OF = initialisation(Gammes[liste_nom_gammes.index(Nouv_gamme)])
+        Gamme_actuelle = Nouv_gamme
+
+        Timer_machine = [0]*Nb_Machines
+        Timer_Stock = [0]*Nb_Stock
+        Etats_T = [1]*(Nb_Machines-1)
+        Etats_M = [1]*Nb_Machines
+        Machines = [0]*Nb_Machines
+        Nb_piece_Stock = [0]*Nb_Stock
+        Nb_piece_Machine = [0]*Nb_Machines
+        Pieces_dans_les_stockages = [[] for k in range(Nb_Machines-1)]
+        Pieces_dans_les_machines = [[] for i in range(Nb_Machines)]
+
+        List_stock_a_update = [0]*(Nb_Machines-1)
+
+        Switch_Etat = [0]*Nb_Machines
+        Values = [[[0]*Nb_Machines,0]]
+        Pieces_finies = []
+        Lead_Time_moy = 0
+        TC_moy = [0]*Nb_Machines
+        Tps_cycle = [0]*Nb_Machines
+        Lead_Time = [0]
+        OF_fait = 0
+        print("Waouh, nouvelle gamme "+Nouv_gamme)
+        Etats.set_value(Etats_M)
+        NbPiecesMachines.set_value(Nb_piece_Machine)
+        NbPiecesStock.set_value(Nb_piece_Stock)
+        Deb.set_value(Nb_seq)
+        Chang.set_value(0)
+        OF_Running.set_value(OF_en_cours)
+        Piece_finies.set_value(0)
+        Nombre_de_Machines.set_value(Nb_Machines)
+        Nom_des_machines.set_value(Nom_machines)
+        Demande_chgt_etat.set_value(Switch_Etat)
+        Tps_cycle_node.set_value(Tps_cycle)
+        Tps_cycle_moy_node.set_value(TC_moy)
+        Lead_Time_node.set_value(Lead_Time[-1])
+        Lead_Time_moy_node.set_value(Lead_Time_moy)
+        Gamme_actuelle_serv.set_value(Gammes[liste_nom_gammes.index(Gamme_actuelle)].nom_produit)
+        Demande_chgt_gamme.set_value(0)
         
+        serveur.start()
 
     #Variables du serveur
 
@@ -166,7 +226,8 @@ def main():
     Lead_Time_node = Param.add_variable(addspace, "Valeurs de lead time (temps de traversée)", Lead_Time[-1])
     Lead_Time_moy_node = Param.add_variable(addspace, "Valeurs de lead time moyen", Lead_Time_moy)
     Stop_serv = Param.add_variable(addspace, "Pour stopper le serveur", 0)
-
+    Gamme_actuelle_serv = Param.add_variable(addspace, "Pour lire la gamme actuelle", Gamme_actuelle.nom_produit)
+    Demande_chgt_gamme = Param.add_variable(addspace, "Pour changer la gamme actuelle", 0)
 
     #Autorisation de modification de certaines variables
 
@@ -183,7 +244,9 @@ def main():
     Lead_Time_node.set_writable()
     Lead_Time_moy_node.set_writable()
     Stop_serv.set_writable()
-
+    Gamme_actuelle_serv.set_writable()
+    Demande_chgt_gamme.set_writable()
+    
     #Lancement du serveur
     serveur.start()
     print("Serveur start at url : {}".format(url))
@@ -203,6 +266,13 @@ def main():
         Switch_Etat = Demande_chgt_etat.get_value()
         Nb_seq = Deb.get_value()
         Stop = Stop_serv.get_value()
+        Chgt_gamme = Demande_chgt_gamme.get_value()
+
+        #Changement de gamme pour la simulation si besoin
+        if Chgt_gamme == 1:
+            Nouvelle_gamme = Gamme_actuelle_serv.get_value()
+            Demande_chgt_gamme.set_value(0)
+            ChangementdeGamme(Nouvelle_gamme)
 
         #Changement des états des machines si besoin
         if Switch_Etat != [0,0,0,0]:

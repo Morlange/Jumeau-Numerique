@@ -4,22 +4,23 @@ import tkinter
 from tkinter import *
 from tkinter import ttk
 from data import color_bg1,color_bg,color_fg
-# A FAIRE :
-# - commenter le code
-# - mettre "ajout de ligne"
-# - rendre joli
-# - machine avec liste dans ajout produit
 
+nombre_operation = 1
 
 def main():
+    global nombre_operation
     #ouverture du fichier en lecture
+    zone_machine=[]
+    machine=[]
     liste_machine=open('liste_machine.txt', 'r')
     l=liste_machine.readlines()
-    machine=[]
-    nom_machine=[]
-    zone_machine=['Composite', 'Usinage', 'Forge','Usinage','Metrologie','Assemblage','Bois','Fonderie']
+    for i in range (len(l)):
+        l[i]=l[i][:-2]
+        if l[i]:
+            machine.append(l[i].split(';'))
+            zone_machine.append(machine[i][0])
     
-    ############# #import du document ####################
+    #import du document #
     document = op.load_workbook('OF.xlsx')
     nom_produits=document.sheetnames
     nombre_produits=len(nom_produits)
@@ -31,8 +32,6 @@ def main():
     #forme des ordres de fabrication : OF=[[nom_produit, n_operation, nom_operation, machine,temps_fabrication,caracteristique], [nom_produit,   n_operation,  , machine,temps_fabrication,caracteristique], ...]
 
     for i in range (nombre_produits) :
-        gamme_produit = []
-        nom_produit = nom_produits[i]
         worksheet = document[nom_produits[i]]
         nombre_ligne = worksheet.max_row
         n_operation=[]
@@ -89,6 +88,95 @@ def main():
         fen_produit.destroy()
         main()
 
+    def ouvrir_fenetre_modifier_produit():
+        OFs=[]
+        select = listeCombo.get()
+        wb = op.load_workbook('OF.xlsx')
+        fenetre_modif = tk.Tk()
+        fenetre_modif.title('Modifier le produit')
+        fenetre_modif.geometry('600x300')
+        fenetre_modif.iconbitmap('logo-AM.ico')
+        tk.Label(fenetre_modif, text="Nom du produit").grid(row=0)
+        tk.Label(fenetre_modif, text="Coût (€)").grid(row=1)
+        tk.Label(fenetre_modif, text="Résistance (MPa)").grid(row=2)
+        tk.Label(fenetre_modif, text="Temps de cycle (min)").grid(row=3)
+        tk.Label(fenetre_modif, text="Gamme de fabrication :").grid(row=4)
+        tk.Label(fenetre_modif, text="N° operation").grid(row=5,column=0)
+        tk.Label(fenetre_modif, text= "Nom operation").grid(row=5,column=1)
+        tk.Label(fenetre_modif, text="machine").grid(row=5,column=2)
+        tk.Label(fenetre_modif, text="Temps fabrication").grid(row=5,column=3)
+
+        for i in range (nombre_produits) :
+            if str(select)==nom_produits[i] :
+                for j in range (len(OF[i][1])):
+                    OFs.append((OF[i][1][j], OF[i][2][j], OF[i][3][j], OF[i][4][j]))
+
+                nom_prod = tk.Entry(fenetre_modif)
+                nom_prod.insert(0,OF[i][0])
+                cout = tk.Entry(fenetre_modif)
+                cout.insert(0,OF[i][5][0])
+                resistance = tk.Entry(fenetre_modif)
+                resistance.insert(0,OF[i][5][1])
+                temps= tk.Entry(fenetre_modif)
+                temps.insert(0,OF[i][5][2])
+
+                nom_prod.grid(row=0, column=1)
+                cout.grid(row=1, column=1)
+                resistance.grid(row=2, column=1)
+                temps.grid(row=3, column=1) 
+
+                nb_operation=len(OF[i][1])
+
+                N_OP=[None for k in range (nb_operation)]
+                nom_OP=[None for k in range (nb_operation)]
+                machine_OP=[None for k in range (nb_operation)]
+                temps_fab_OP=[None for k in range (nb_operation)]
+
+                for k in range (0,nb_operation):
+                    N_OP[k] = tk.Entry(fenetre_modif)
+                    print(OFs)
+                    N_OP[k].insert(0,OFs[k][0])
+                    nom_OP [k]= tk.Entry(fenetre_modif)
+                    nom_OP[k].insert(0,OFs[k][1])
+                    for l in range (0,len(zone_machine)):
+                        if zone_machine[l]==OFs[k-1][2]:
+                            machine_OP[k]=ttk.Combobox(fenetre_modif, values=zone_machine) #liste déroulante des zones
+                            machine_OP[k].current(l)
+                    temps_fab_OP [k]= tk.Entry(fenetre_modif)
+                    temps_fab_OP[k].insert(0,OFs[k][3])
+                    N_OP[k].grid(row=k+5, column=0)
+                    nom_OP[k].grid(row=k+5, column=1)
+                    machine_OP[k].grid(row=k+5, column=2)
+                    temps_fab_OP[k].grid(row=k+5, column=3)
+                    
+                    
+        def modifier_produit():
+            sheet = wb[select]
+            sheet['B1'] = int(cout.get())
+            sheet['B2'] = int(resistance.get())
+            sheet['B3'] = int(temps.get())
+
+                    
+            for m in range(nb_operation-1):
+                a=N_OP[m].get()
+                b=nom_OP[m].get()
+                c=machine_OP[m].get()
+                d=temps_fab_OP[m].get()
+
+                sheet['A{}'.format(m+5)] = a
+                sheet['B{}'.format(m+5)] = b
+                sheet['C{}'.format(m+5)] = c
+                sheet['D{}'.format(m+5)] = d
+            wb.save('OF.xlsx')
+            fenetre_modif.destroy()
+            fen_produit.destroy()
+            main()
+
+        
+        tk.Button(fenetre_modif, text='Modifier le produit',fg=color_fg, bg=color_bg, command=modifier_produit).grid(row=100, column=2, sticky=tk.W)
+        tk.mainloop()
+
+    
     def action(event):
         # Obtenir l'élément sélectionné
         select = listeCombo.get()
@@ -96,12 +184,11 @@ def main():
         # Srollbar 
         scrollbar = Scrollbar(fen_produit, orient=VERTICAL)
         scrollbar.grid(row=2, column=3, sticky=N+S)
-        
-        
-        #style = ttk.Style(fen_produit)
-        #style.theme_use("winnative")  # Charger un thème pour pouvoir accéder aux éléments de style
-        #style.configure("Treeview", background=color_bg1, foreground="white", fieldbackground=color_bg1)
-        #style.map("Treeview", background=[("selected", "#0066CC")], foreground=[("selected", "white")])
+    
+        style = ttk.Style(fen_produit)
+        style.theme_use("winnative")  # Charger un thème pour pouvoir accéder aux éléments de style
+        style.configure("Treeview", background=color_bg1, foreground="white", fieldbackground=color_bg1)
+        style.map("Treeview", background=[("selected", "#0066CC")], foreground=[("selected", "white")])
         
         #définir le tableau et joindre avec le mouvement de la scrollbar 
         tableau = ttk.Treeview(fen_produit, columns=('gamme_fabrication', 'nom_operation', 'machine', 'temps_fabrication'),show='headings',yscrollcommand = scrollbar.set)
@@ -145,17 +232,16 @@ def main():
         
         
         bouton_suppr_produit = tk.Button (fen_produit, text = 'Supprimer le produit', fg=color_fg, bg=color_bg,command=suppr_produit)
-        bouton_suppr_produit.grid(row=8,column=1, padx=40,pady=20)
+        bouton_suppr_produit.grid(row=8,column=0, padx=40,pady=20)
+
+        bouton_modifier_produit = tk.Button (fen_produit, text = 'Modifier le produit', fg=color_fg, bg=color_bg,command=ouvrir_fenetre_modifier_produit)
+        bouton_modifier_produit.grid(row=8,column=1, padx=40,pady=20)
 
     #liste_N_OP, liste_nom_OP, liste_machine_OP, liste_temps_fab_OP = ajout_produit()
     # fonction ajouter un produit reliée au bouton "Ajouter"
     
-    
-
     def ouvrir_fen_nouveau_produit():
-        nombre_operation = 1
-
-        def ajout_produit(nombre_operation):
+        def ajout_produit():
         #Dernier bouton qui ajoute véritablement dans l'excel
             
         # Gestion du fichier excel
@@ -188,11 +274,8 @@ def main():
                 wb.save('OF.xlsx')
                 fenetre.destroy()
                 fen_produit.destroy()
-                
-                #return (liste_N_OP, liste_nom_OP, liste_machine_OP, liste_temps_fab_OP)
-            
-            
-
+                main()
+       
         fenetre = tk.Tk()
         fenetre.title('Ajouter un nouveau produit')
         fenetre.geometry('600x300')
@@ -252,12 +335,12 @@ def main():
             liste_machine_OP.append (machine_OP)
             liste_temps_fab_OP.append (temps_fab_OP)
 
-        bouton_ajout_OP = tk.Button (fenetre, text = 'Ajouter une operation', fg=color_fg, bg=color_bg,command=lambda : nouvelle_operation(nombre_operation))
+        bouton_ajout_OP = tk.Button (fenetre, text = 'Ajouter une operation', fg=color_fg, bg=color_bg,command= nouvelle_operation)
         bouton_ajout_OP.grid(row=99, column=2)
 
         
 
-        tk.Button(fenetre, text='Ajouter le produit',fg=color_fg, bg=color_bg, command=lambda : ajout_produit(nombre_operation)).grid(row=100, column=2, sticky=tk.W)
+        tk.Button(fenetre, text='Ajouter le produit',fg=color_fg, bg=color_bg, command=ajout_produit).grid(row=100, column=2, sticky=tk.W)
         tk.mainloop()
 
     # Ajout d'un produit

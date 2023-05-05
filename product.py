@@ -51,6 +51,7 @@ class machine():
         self.nb_piece = 0
         self.pieces_presentes = []
         self.En_fonctionnement = True
+        self.process_dispo = []
     
     def ajout_piece(self,pieces):
         '''Quand on rajoute une pièce au début de la ligne de production'''
@@ -82,6 +83,20 @@ class machine():
         else:
             self.En_fonctionnement = True
             print("Fonctionne à nouveau")
+    
+    def definir_process_disponible(self,nom_produit):
+        self.process_dispo += [nom_produit]
+
+
+class Gamme_de_produit:
+
+    def __init__(self,nom, liste_nom_process, liste_ordre_machine, temps_par_process):
+        self.nom_produit = nom
+        self.nom_process = liste_nom_process
+        self.liste_ordre_machine = liste_ordre_machine
+        self.temps_par_machine = temps_par_process
+
+
 
 def main() :
     quit()

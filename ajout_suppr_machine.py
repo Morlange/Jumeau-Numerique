@@ -65,6 +65,17 @@ def main():
     frame_suppr = tk.LabelFrame(fen_machine, text='Supprimer une machine', font =('Times new roman', 12), fg=color_fg, bg=color_bg1, labelanchor='nw')
     frame_suppr.grid(row=7,column=7,padx=5, pady=10)
 
+    frame_mach = tk.LabelFrame(fen_machine, text='Liste des machines :', font =('Times new roman', 12), fg=color_fg, bg=color_bg1)
+    frame_mach.grid(row=8,column=7,padx=20, pady=10)
+    nom_machine1=""
+    for k in (nom_machine):
+        print(k)
+        nom_machine1 += k+str("\n")
+    
+    frame_nom_mach=tk.Label(frame_mach, text=nom_machine1, font =('Times new roman', 12), fg=color_fg, bg=color_bg1)
+    frame_nom_mach.grid(row=9,column=7,padx=20, pady=10)
+
+
     L_machine = Label(frame_ajout, text='Nom de la machine',fg=color_fg, bg=color_bg1).grid(row=2, column=2,padx=10,pady=10)
     L_machine = Label(frame_ajout, text='Zone',fg=color_fg, bg=color_bg1).grid(row=2, column=3,padx=10,pady=10)
 
