@@ -16,7 +16,6 @@ import time
 from data import client,LogoAM,TRS,Images_TRS,Temps_de_production,Nombre_pieces,color_bg1,color_bg,color_fg,Serveur_ON
 import produits_fini
 import ajout_suppr_machine
-import ouvrir_OF
 import flux
 import Jumeau_Num_Assemblage
 import analyse
@@ -34,10 +33,6 @@ import subprocess
     #analyse.main()
     subprocess.Popen("python analyse.py")
 """
-def ouvrir_OF ():
-    '''ouvre les programmes suivants: ouvrir_OF'''
-    #ouvrir_OF.main()
-    subprocess.Popen("python ouvrir_OF.py")
 
 def appel_flux():
     '''sert à appeler le programme flux'''
@@ -150,7 +145,7 @@ fen.config(menu=mon_menu)
 
 #Les 4 principaux onglets
 mon_menu.add_command(label='Etat',command=ouvrir_etat)
-mon_menu.add_command(label='OF',command=ouvrir_OF)
+mon_menu.add_command(label='OF',command=ajout_produits)
 
 #mon_menu.add_command(label='Analyse',command=ouvrir_analyse)
 
@@ -158,10 +153,8 @@ mon_menu.add_command(label='OF',command=ouvrir_OF)
 bouton_etat = Button (fen, text = 'Etat des machines',bd=1, font=('Calibri', 12),fg=color_fg, bg = color_bg,command=ouvrir_etat)
 bouton_etat.grid(row=1, column=0, padx=40 ,pady=10)
 
-bouton_flux =  Button (fen,text='Affichage du flux', bd=1, font=('Calibri', 12),fg=color_fg, bg = color_bg,command=appel_flux)
-bouton_flux.grid(row=3, column=1, padx=40,pady=10)
 
-bouton_OF =  Button (fen, text = 'Gammes de fabrication',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=ouvrir_OF)
+bouton_OF =  Button (fen, text = 'Produits',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=ajout_produits)
 bouton_OF.grid(row=1, column=1, padx=40 ,pady=10)
 
 """
@@ -177,9 +170,6 @@ bouton_start_server.grid(row=2, column=1, padx=40 ,pady=10)
 
 bouton_start_server =  Button (fen, text = 'Vérifier le serveur',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=check_serveur)
 bouton_start_server.grid(row=2, column=2, padx=40 ,pady=10)
-
-bouton_ajout_produits =  Button (fen, text = 'Produits',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=ajout_produits)
-bouton_ajout_produits.grid(row=3, column=0, padx=40,pady=10 )
 
 bouton_ajout_machines =  Button (fen, text = 'Machines',bd=1,font=('Calibri', 12), fg=color_fg, bg = color_bg,command=ajout_machines)
 bouton_ajout_machines.grid(row=4, column=1, padx=40,pady=10 )

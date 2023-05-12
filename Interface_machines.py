@@ -240,7 +240,8 @@ def main():
         #Actualisation du nombre de pièces par machine et du nombre de pièces par stock
         for i in range(nb_machine):
             Label_position_machine[i].configure(text = Nb_piece_machine[i])
-        for i in range(len(Nb_piece_stockage)):
+        for i in range(nb_machine-1):
+            print(i,Nb_piece_stockage,len(Label_position_transport))
             Label_position_transport[i].configure(text = Nb_piece_stockage[i])
             canv.itemconfig(Images[i], image = img[Etat_stockage(i,piece_max)])
         

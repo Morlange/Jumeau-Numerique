@@ -32,19 +32,9 @@ def main():
     label_titre = Label(fen_analyse, text='Analyse de production', height=1,fg=color_fg,font=('Calibri', 14),bg=color_bg1) 
     label_titre.grid(row=0,column=1)
 
-    # Selectionner produit 
-    #label_choix = Label(fen_analyse, text='Choisissez un produit:',fg=color_fg, bg=color_bg1)
-    #label_choix.grid(row=1, column=0, padx=0, pady=10)
-
     #récupère le nom de tous les produits depuis le fichier data
     liste_nom_gammes = [Gammes[k].nom_produit for k in range(len(Gammes))]
 
-    #Création de la Combobox
-    #listeCombo = ttk.Combobox(fen_analyse, values=liste_nom_gammes)
-
-    TRS=[randint (1,100) for i in range (len(liste_nom_gammes))]
-
-    
     # Obtenir le nom du produit dans le serveur
     url = "opc.tcp://127.0.0.1:4880"
     client = Client(url)
@@ -147,89 +137,47 @@ def main():
         
         savefig(namefile, transparent = True)
 
-    
-    
-    #Frame TRS
-    #frame_TRS = LabelFrame(fen_analyse, text='TRS', font =('Calibri', 12), bg=color_bg1, labelanchor='nw', fg=color_fg)
-    #frame_TRS.grid(row=1,column=0)
-    #Label(frame_TRS, text='Fonderie', background=color_bg1, fg=color_fg).grid(row=1, column=0)
-    #Label(frame_TRS, text='Usinage', background=color_bg1, fg=color_fg).grid(row=3, column=0)
-    #Label(frame_TRS, text='Assemblage', background=color_bg1, fg=color_fg).grid(row=5, column=0)
-
-
-    #Choisir l'élément qui s'affiche par défaut
-    #listeCombo.grid(row=1, column=1,padx=0,pady=10)
-
-    #listeCombo.bind("<<ComboboxSelected>>", action)
-
-    #PROGRAMME EN COURS POUR CREER ET AFFICHER LES IMAGES TRS DE TOUTES LES MACHINES (à adapter)
+    #création d'une liste aléatoire de TRS (à remplacer par valeurs réelles)
     k=len(liste_nom_machine)
-    TRS1=[randint(0,100) for i in range (k)] # liste aléatoire pour l'instant
+    TRS1=[randint(0,100) for i in range (k)]
 
-    liste_pour_TRS = [TRS1,liste_nom_machine] #TRS1 est une liste à remplacer par la vraie liste des TRS
+    #création d'une liste sous forme [[TRS1, TRS2, ...], [machine1, machine2, ...]]
+    liste_pour_TRS = [TRS1,liste_nom_machine]
     N = len(liste_pour_TRS[0])
+
+    #partie pour affichage des TRS, nombres de pièces, produites, temps de production 
+    #création et positionnement des frame 
     frame_TRS = LabelFrame(fen_analyse, text='TRS', font =('Calibri', 12), bg=color_bg1, labelanchor='nw', fg=color_fg)
     frame_TRS.grid(row=1,column=0)
     frame_temps_de_production = LabelFrame(fen_analyse, text='Temps de production', font =('Calibri', 12), bg=color_bg1, labelanchor='nw', fg=color_fg)
     frame_temps_de_production.grid(row=1,column=1)
     frame_nb_pieces = LabelFrame(fen_analyse, text='Nombre de pièces produites', font =('Calibri', 12), bg=color_bg1, labelanchor='nw', fg=color_fg)
     frame_nb_pieces.grid(row=1,column=3)
+    
+    #création de k et j pour placer les figures dans la grille
     k=0
     j=1
     Nombre_pieces = NbPiecesMachines.get_value()
     for i in range (N) : 
+       #création et positionnement des graph TRS
        creerGraphsTRS(liste_pour_TRS[0][i],liste_pour_TRS[1][i], liste_pour_TRS[1][i])
        Images += afficher_Image(frame_TRS,j,k, liste_pour_TRS[1][i]+".png",taille,Images)
-
+       
+       #affichage des titres des noms des machines pour les 3 parties affichées
        Label(frame_TRS, text=liste_pour_TRS[1][i], background=color_bg1, fg=color_fg).grid(row=j+1, column=k)
        Label(frame_temps_de_production, text=liste_pour_TRS[1][i], background=color_bg1, fg=color_fg).grid(row=i, column=0)
        Label(frame_nb_pieces, text=liste_pour_TRS[1][i], bg=color_bg1, fg=color_fg).grid(row=i, column=0)
-
+    
+       #affichage de temps de production et nombres de pièces
        Label(frame_temps_de_production, text=Nombre_pieces[i], bg=color_bg1, fg=color_fg).grid(row=i, column=1)
        Label(frame_nb_pieces, text='0', bg=color_bg1, fg=color_fg).grid(row=i, column=1)
-
+       
+       # mise à jour des variables k et j pour l'affichage
        if k==1 : 
            k=0
            j=j+2
        elif k==0 : 
            k=1  
-
-
-    #creerGraphsTRS(TRS[0],"TRS_fonderie","TRS fonderie")
-    #creerGraphsTRS(TRS[1],"TRS_usinage","TRS usinage")
-    #creerGraphsTRS(TRS[2],"TRS_assemblage","TRS assemblage")
-
-    #Images += afficher_Image(frame_TRS,2,0,"TRS_usinage.png",taille,Images)
-    #Images += afficher_Image(frame_TRS,4,0,"TRS_fonderie.png",taille,Images)
-    #Images += afficher_Image(frame_TRS,6,0,"TRS_assemblage.png",taille,Images)
-
-    """
-    Label(frame_TRS, label_usinage, bg=color_bg1).grid(row=2, column=0)
-    Label(frame_TRS, label_fonderie, bg=).grid(row=4, column=0)           ###mettre les images 
-    Label(frame_TRS, label_assemblage, bg=color_bg1).grid(row=6, column=0)
-    """
-
-    #Frame Temps de production
-    #frame_temps_de_production = LabelFrame(fen_analyse, text='Temps de production', font =('Calibri', 12), bg=color_bg1, labelanchor='nw', fg=color_fg)
-    #frame_temps_de_production.grid(row=1,column=1)
-    #Label(frame_temps_de_production, text='Fonderie', background=color_bg1, fg=color_fg).grid(row=2, column=0)
-    #Label(frame_temps_de_production, text='Usinage', background=color_bg1, fg=color_fg).grid(row=2, column=1)
-    #Label(frame_temps_de_production, text='Assemblage', background=color_bg1, fg=color_fg).grid(row=2, column=2)
-
-    #Label(frame_temps_de_production, text='0', bg=color_bg1, fg=color_fg).grid(row=3, column=0)
-    #Label(frame_temps_de_production, text='0', bg=color_bg1, fg=color_fg).grid(row=3, column=1)
-    #Label(frame_temps_de_production, text='0', bg=color_bg1, fg=color_fg).grid(row=3, column=2)
-
-    #Frame nombre de pièces 
-    #frame_nb_pieces = LabelFrame(fen_analyse, text='Nombre de pièces produites', font =('Calibri', 12), bg=color_bg1, labelanchor='nw', fg=color_fg)
-    #frame_nb_pieces.grid(row=1,column=2)
-    #Label(frame_nb_pieces, text='Fonderie', bg=color_bg1, fg=color_fg).grid(row=3, column=0)
-    #Label(frame_nb_pieces, text='Usinage', bg=color_bg1, fg=color_fg).grid(row=3, column=1)
-    #Label(frame_nb_pieces, text='Assemblage', bg=color_bg1, fg=color_fg).grid(row=3, column=2)
-
-    #Label(frame_nb_pieces, text='0', bg=color_bg1, fg=color_fg).grid(row=4, column=0)
-    #Label(frame_nb_pieces, text='0', bg=color_bg1, fg=color_fg).grid(row=4, column=1)
-    #Label(frame_nb_pieces, text='0', bg=color_bg1, fg=color_fg).grid(row=4, column=2)
 
     #Boucle d'affichage
     fen_analyse.mainloop()

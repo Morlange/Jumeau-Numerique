@@ -134,12 +134,11 @@ def main():
 
                 for k in range (0,nb_operation):
                     N_OP[k] = tk.Entry(fenetre_modif)
-                    print(OFs)
                     N_OP[k].insert(0,OFs[k][0])
                     nom_OP [k]= tk.Entry(fenetre_modif)
                     nom_OP[k].insert(0,OFs[k][1])
                     for l in range (0,len(zone_machine)):
-                        if zone_machine[l]==OFs[k-1][2]:
+                        if zone_machine[l]==OFs[k][2]:
                             machine_OP[k]=ttk.Combobox(fenetre_modif, values=zone_machine) #liste déroulante des zones
                             machine_OP[k].current(l)
                     temps_fab_OP [k]= tk.Entry(fenetre_modif)
@@ -152,12 +151,13 @@ def main():
                     
         def modifier_produit():
             sheet = wb[select]
+            sheet.title = nom_prod.get()
             sheet['B1'] = int(cout.get())
             sheet['B2'] = int(resistance.get())
             sheet['B3'] = int(temps.get())
 
                     
-            for m in range(nb_operation-1):
+            for m in range(nb_operation):
                 a=N_OP[m].get()
                 b=nom_OP[m].get()
                 c=machine_OP[m].get()
