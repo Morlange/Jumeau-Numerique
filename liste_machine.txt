@@ -1,7 +1,6 @@
-Ligne;Assembl
-Four;Fonde
-Degauchisseuse;B
-Emboutisseuse;Fo
-Moulage automatique;Fonder
-Fraiseuse 3 axes manuelle;Usinag
-Machine tri-dimensionnelle;Metrologie
+Ligne;Assemblage
+Four;Fonderie
+Degauchisseuse;Bois
+Emboutisseuse;Forge
+Moulage automatique;Fonderie
+Fraiseuse 3 axes manuelle;Usinage

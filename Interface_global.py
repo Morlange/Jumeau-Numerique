@@ -17,7 +17,6 @@ from data import client,LogoAM,TRS,Images_TRS,Temps_de_production,Nombre_pieces,
 import produits_fini
 import ajout_suppr_machine
 import flux
-import Jumeau_Num_Assemblage
 import analyse
 import Calendrier
 import Interface_machines
@@ -42,7 +41,7 @@ def appel_flux():
 def ouvrir_jum_ass():
     '''sert à appeler le programme Jumeau_Num_Assemblage'''
     #Jumeau_Num_Assemblage.main()
-    subprocess.Popen("python Jumeau_Num_Assemblage.py")
+    subprocess.Popen("python Interface_Equilibrage_Ordonnancement_Simulation.py")
 
 def ajout_produits():
     #produits_fini.main()

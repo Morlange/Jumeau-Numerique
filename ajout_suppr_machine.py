@@ -14,7 +14,7 @@ def main():
 
 
     for i in range (len(l)):
-        l[i] = l[i][:-2]
+        l[i] = l[i][:-1]
         if l[i]: #supprime les lignes qui sont 'vides' 
             machine.append(l[i].split(';'))
             nom_machine.append(machine[i][0]) # nom_machine est sous forme [['machine1', 'zone1'], ['machine2', 'zone2'],...]
@@ -50,6 +50,7 @@ def main():
                 machine_write.write(';')
                 machine_write.write(machine[i][1])
                 machine_write.write('\n')
+                print("aaaaaa"+machine[i][0]+";"+machine[i][1]+'\n')
         liste_machine.close()
 
     #fenêtre machine

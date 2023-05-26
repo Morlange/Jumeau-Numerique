@@ -4,8 +4,8 @@ base = None
 executables = [Executable("Interface_global.py", base=base)]
 #Renseignez ici la liste complète des packages utilisés par votre application
 packages = ["idna","opcua","matplotlib","numpy","PIL",
-            "tkinter","xlrd","xlsxwriter",
-            "time","datetime","openpyxl","random","functools"]
+            "tkinter","xlrd","xlsxwriter","xlwt","xlutils"
+            "time","datetime","openpyxl","random","functools","simpy"]
 options = {
     'build_exe': {    
         'packages':packages,
